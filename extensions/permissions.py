@@ -2,7 +2,7 @@ from rest_framework.permissions import BasePermission
 from django.utils import timezone
 
 from extensions.exceptions import ValidationError
-from apps.system.models import User
+from apps.user.models import User
 
 
 class IsAuthenticated(BasePermission):

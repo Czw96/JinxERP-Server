@@ -3,7 +3,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken
 
 from extensions.exceptions import NotAuthenticated
-from apps.system.models import User
+from apps.user.models import User
 
 
 class SimpleJWTSchemeEx(SimpleJWTScheme):

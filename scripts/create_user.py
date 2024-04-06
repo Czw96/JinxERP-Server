@@ -4,7 +4,8 @@ from django.db import transaction
 from datetime import timedelta
 
 from scripts.Permissions import PERMISSIONS
-from apps.system.models import *
+from apps.system.models import Team, PagePermission
+from apps.user.models import User, Warehouse
 
 
 def run(*args):
