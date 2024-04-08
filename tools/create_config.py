@@ -86,7 +86,7 @@ ALLOWED_HOSTS = ['*']
 
 DATABASES = {{
     'default': {{
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django_tenants.postgresql_backend",
         'HOST': '{host}',
         'PORT': '5432',
         'USER': '{user}',

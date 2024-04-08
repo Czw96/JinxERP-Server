@@ -14,7 +14,8 @@ django-debug-toolbar = "*"
 pillow = "*"
 gunicorn = "*"
 celery = "*"
-psycopg2-binary = "*"
+psycopg = {extras = ["pool", "binary"], version = "*"}
+django-tenants = "*"
 
 [dev-packages]
 autopep8 = "*"
