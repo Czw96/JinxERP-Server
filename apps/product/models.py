@@ -4,51 +4,47 @@ from django.db import models
 from extensions.models import RefModel
 
 
-class ProductImage(Model):
-    """产品图片"""
-
-    file = models.ImageField(upload_to='image', verbose_name='文件')
-    name = models.CharField(max_length=64, verbose_name='名称')
-    create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
-    team = models.ForeignKey('system.Team', on_delete=models.CASCADE, related_name='product_image_set')
-
-
 class Product(RefModel):
     """产品"""
 
-    number = models.CharField(max_length=32, verbose_name='编号')
-    name = models.CharField(max_length=128, verbose_name='名称')
-    code = models.CharField(max_length=128, null=True, blank=True, verbose_name='代码')
-    barcode = models.CharField(max_length=32, verbose_name='条码')
-    spec = models.CharField(max_length=64, null=True, blank=True, verbose_name='规格')
+    number = models.CharField(max_length=20, unique=True, verbose_name='编号')
+    name = models.CharField(max_length=120, db_index=True, verbose_name='名称')
+    barcode = models.CharField(max_length=20, db_index=True, verbose_name='条码')
+    spec = models.CharField(max_length=60, null=True, blank=True, verbose_name='规格')
     category_set = models.ManyToManyField(
         'data.ProductCategory', blank=True, related_name='product_set', verbose_name='产品分类')
-    image_set = models.ManyToManyField(
-        'product.ProductImage', blank=True, related_name='product_set', verbose_name='图片')
     main_image = models.ForeignKey(
         'product.ProductImage', on_delete=models.SET_NULL, null=True, related_name='product_set', verbose_name='主图')
     brand = models.ForeignKey(
         'data.Brand', on_delete=models.SET_NULL, null=True, related_name='product_set', verbose_name='品牌')
-    unit = models.CharField(max_length=32, null=True, blank=True, verbose_name='单位')
-    remark = models.CharField(max_length=256, null=True, blank=True, verbose_name='备注')
-    is_active = models.BooleanField(default=True, verbose_name='激活状态')
+    unit = models.CharField(max_length=20, null=True, blank=True, verbose_name='单位')
+    remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
+    is_active = models.BooleanField(default=True, db_index=True, verbose_name='激活状态')
 
     supplier_set = models.ManyToManyField('data.Supplier', blank=True, related_name='product_set', verbose_name='供应商')
-    enable_batch_control = models.BooleanField(default=False, verbose_name='批次控制')
+    enable_batch_control = models.BooleanField(default=False, db_index=True, verbose_name='批次控制')
     shelf_life_days = models.IntegerField(null=True, verbose_name='保质期天数')
-    update_time = models.DateTimeField(auto_now=True, verbose_name='修改时间')
+    update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
-    team = models.ForeignKey('system.Team', on_delete=models.CASCADE, related_name='product_set')
 
     class Meta:
-        unique_together = [('number', 'team'), ('barcode', 'spec', 'delete_time' 'team')]
+        unique_together = [('name', 'spec', 'delete_time')]
+
+
+class ProductImage(Model):
+    """产品图片"""
+
+    product = models.ForeignKey(
+        'product.Product', on_delete=models.CASCADE, null=True, related_name='product_image_set', verbose_name='产品')
+    file = models.ImageField(upload_to='product_images', verbose_name='文件')
+    create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
 
 class Inventory(Model):
     """库存"""
 
     warehouse = models.ForeignKey(
-        'system.Warehouse', on_delete=models.CASCADE, related_name='inventory_set', verbose_name='仓库')
+        'user.Warehouse', on_delete=models.CASCADE, related_name='inventory_set', verbose_name='仓库')
     product = models.ForeignKey(
         'product.Product', on_delete=models.CASCADE, related_name='inventory_set', verbose_name='产品')
     purchase_price = models.FloatField(null=True, verbose_name='采购单价')
@@ -56,43 +52,40 @@ class Inventory(Model):
     level_price1 = models.FloatField(null=True, verbose_name='等级价一')
     level_price2 = models.FloatField(null=True, verbose_name='等级价二')
     level_price3 = models.FloatField(null=True, verbose_name='等级价三')
-    total_quantity = models.FloatField(default=0, verbose_name='库存数量')
-    has_stock = models.BooleanField(default=False, verbose_name='库存状态')
-    is_on_sale = models.BooleanField(default=True, verbose_name='在售状态')
-    enable_warning = models.BooleanField(default=False, verbose_name='预警启用状态')
+    total_quantity = models.FloatField(default=0, db_index=True, verbose_name='库存数量')
+    has_stock = models.BooleanField(default=False, db_index=True, verbose_name='库存状态')
+    is_on_sale = models.BooleanField(default=True, db_index=True, verbose_name='在售状态')
+    enable_warning = models.BooleanField(default=False, db_index=True, verbose_name='预警启用状态')
     min_quantity = models.FloatField(null=True, verbose_name='最小数量')
     max_quantity = models.FloatField(null=True, verbose_name='最大数量')
-    update_time = models.DateTimeField(auto_now=True, verbose_name='修改时间')
-    team = models.ForeignKey('system.Team', on_delete=models.CASCADE, related_name='inventory_set')
 
     class Meta:
-        unique_together = [('warehouse', 'product', 'team')]
+        unique_together = [('warehouse', 'product')]
 
 
 class Batch(Model):
     """批次"""
 
-    number = models.CharField(max_length=32, verbose_name='编号')
+    number = models.CharField(max_length=20, db_index=True, verbose_name='编号')
     inventory = models.ForeignKey(
         'product.Inventory', on_delete=models.CASCADE, related_name='batch_set', verbose_name='库存')
     warehouse = models.ForeignKey(
-        'system.Warehouse', on_delete=models.CASCADE, related_name='batch_set', verbose_name='仓库')
+        'user.Warehouse', on_delete=models.CASCADE, related_name='batch_set', verbose_name='仓库')
     product = models.ForeignKey(
         'product.Product', on_delete=models.CASCADE, related_name='batch_set', verbose_name='产品')
-    total_quantity = models.FloatField(default=0, verbose_name='库存数量')
-    has_stock = models.BooleanField(default=False, verbose_name='库存状态')
+    total_quantity = models.FloatField(default=0, db_index=True, verbose_name='库存数量')
+    has_stock = models.BooleanField(default=False, db_index=True, verbose_name='库存状态')
     production_date = models.DateField(null=True, verbose_name='生产日期')
     expiry_date = models.DateField(null=True, verbose_name='到期日期')
-    remark = models.CharField(max_length=256, null=True, blank=True, verbose_name='备注')
-    team = models.ForeignKey('system.Team', on_delete=models.CASCADE, related_name='batch_set')
+    remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
 
     class Meta:
-        unique_together = [('number', 'inventory', 'production_date', 'team')]
+        unique_together = [('number', 'inventory', 'production_date')]
 
 
 __all__ = [
-    'ProductImage',
     'Product',
+    'ProductImage',
     'Inventory',
     'Batch',
 ]

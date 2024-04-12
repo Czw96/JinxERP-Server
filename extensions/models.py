@@ -1,5 +1,5 @@
 
-from django.db.models import Model, Manager, QuerySet, ProtectedError
+from django.db.models import Model, Manager, QuerySet
 from django.db import models
 from django.utils import timezone
 from typing import Dict, Tuple
@@ -8,19 +8,8 @@ from typing import Dict, Tuple
 class RefQuerySet(QuerySet):
 
     def delete(self) -> Tuple[int, Dict[str, int]]:
-        deleted_count = 0
-        deletion_results = {}
-        for instance in self:
-            result = instance.delete()
-            deleted_count += result[0]
-
-            for model_name, count in result[1].items():
-                if model_name in deletion_results:
-                    deletion_results[model_name] += count
-                else:
-                    deletion_results[model_name] = count
-
-        return (deleted_count, deletion_results)
+        self.filter(is_deleted=False).update(is_deleted=True, delete_time=timezone.now())
+        return (0, {})
 
 
 class RefManager(Manager):
@@ -40,7 +29,7 @@ class RefManager(Manager):
 
 
 class RefModel(Model):
-    is_deleted = models.BooleanField(default=False, verbose_name='删除状态')
+    is_deleted = models.BooleanField(default=False, db_index=True, verbose_name='删除状态')
     delete_time = models.DateTimeField(null=True, verbose_name='删除时间')
     objects: RefManager = RefManager()
 
@@ -48,14 +37,11 @@ class RefModel(Model):
         abstract = True
 
     def delete(self, using=None, keep_parents=None) -> Tuple[int, Dict[str, int]]:
-        try:
-            return super().delete(using, keep_parents)
-        except ProtectedError:
-            if not self.is_deleted:
-                self.is_deleted = True
-                self.delete_time = timezone.now()
-                self.save(update_fields=['is_deleted', 'delete_time'])
-            return (0, {})
+        if not self.is_deleted:
+            self.is_deleted = True
+            self.delete_time = timezone.now()
+            self.save(update_fields=['is_deleted', 'delete_time'])
+        return (0, {})
 
 
 __all__ = [

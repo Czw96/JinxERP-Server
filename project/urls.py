@@ -34,8 +34,8 @@ urlpatterns = [
 
     path('api/', include('apps.system.urls')),
     path('api/', include('apps.user.urls')),
-    # path('api/', include('apps.data.urls')),
-    # path('api/', include('apps.product.urls')),
+    path('api/', include('apps.data.urls')),
+    path('api/', include('apps.product.urls')),
     # path('api/', include('apps.approval.urls')),
     # path('api/', include('apps.purchase.urls')),
     # path('api/', include('apps.sales.urls')),

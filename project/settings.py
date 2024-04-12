@@ -45,8 +45,8 @@ TENANT_APPS = [
     'debug_toolbar',
 
     'apps.user',
-    # 'apps.data',
-    # 'apps.product',
+    'apps.data',
+    'apps.product',
     # 'apps.approval',
     # 'apps.purchase',
     # 'apps.sales',

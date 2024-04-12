@@ -21,4 +21,4 @@ def run(*args):
 
         with tenant_context(team):
             User.objects.create(
-                username=username, password=make_password(username), name=username, code=username, is_manager=True)
+                username=username, password=make_password(username), name=username, is_manager=True)

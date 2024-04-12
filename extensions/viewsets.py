@@ -10,10 +10,6 @@ class FunctionViewSet(ViewSet):
     """功能视图"""
 
     @property
-    def team(self):
-        return self.request.user.team
-
-    @property
     def user(self):
         return self.request.user
 
@@ -31,10 +27,6 @@ class GenericViewSetEx(GenericViewSet):
     prefetch_related_fields = []
 
     @property
-    def team(self):
-        return self.request.user.team
-
-    @property
     def user(self):
         return self.request.user
 
@@ -43,10 +35,16 @@ class GenericViewSetEx(GenericViewSet):
         return self.get_serializer_context()
 
     def get_queryset(self):
-        queryset = super().get_queryset().filter(team=self.team)
+        queryset = super().get_queryset()
         queryset = queryset.select_related(*self.select_related_fields)
         queryset = queryset.prefetch_related(*self.prefetch_related_fields)
         return queryset
+
+
+class ListViewSet(GenericViewSetEx, ListModelMixin):
+    """列表视图"""
+
+    pagination_class = None
 
 
 class QueryViewSet(GenericViewSetEx, RetrieveModelMixin, ListModelMixin):
@@ -58,5 +56,5 @@ class ModelViewSetEx(QueryViewSet, CreateModelMixin, UpdateModelMixin, DestroyMo
 
 
 __all__ = [
-    'FunctionViewSet', 'GenericViewSetEx', 'QueryViewSet', 'ModelViewSetEx',
+    'FunctionViewSet', 'GenericViewSetEx', 'ListViewSet', 'QueryViewSet', 'ModelViewSetEx',
 ]
