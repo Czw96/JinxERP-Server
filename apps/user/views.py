@@ -80,12 +80,12 @@ class UserViewSet(ModelViewSetEx):
 class UserActionViewSet(FunctionViewSet):
     """用户操作"""
 
-    @extend_schema(request=MakeTokenRequest, responses={200: MakeTokenResponse})
+    @extend_schema(request=CreateTokenRequest, responses={200: CreateTokenResponse})
     @action(detail=False, methods=['post'])
-    def make_token(self, request, *args, **kwargs):
-        """生成令牌"""
+    def create_token(self, request, *args, **kwargs):
+        """创建令牌"""
 
-        serializer = MakeTokenRequest(data=request.data)
+        serializer = CreateTokenRequest(data=request.data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
 
@@ -101,12 +101,12 @@ class UserActionViewSet(FunctionViewSet):
         data = {'access': str(token.access_token), 'refresh': str(token)}
         return Response(data=data, status=status.HTTP_200_OK)
 
-    @extend_schema(request=RefreshTokenRequest, responses={200: RefreshTokenResponse})
+    @extend_schema(request=UpdateTokenRequest, responses={200: UpdateTokenResponse})
     @action(detail=False, methods=['post'])
-    def refresh_token(self, request, *args, **kwargs):
-        """刷新令牌"""
+    def update_token(self, request, *args, **kwargs):
+        """更新令牌"""
 
-        serializer = RefreshTokenRequest(data=request.data)
+        serializer = UpdateTokenRequest(data=request.data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
 
@@ -122,12 +122,12 @@ class UserActionViewSet(FunctionViewSet):
         data = {'access': str(token.access_token), 'refresh': str(token)}
         return Response(data=data, status=status.HTTP_200_OK)
 
-    @extend_schema(request=LogoffTokenRequest, responses={204: None})
+    @extend_schema(request=RevokeTokenRequest, responses={204: None})
     @action(detail=False, methods=['post'])
-    def logoff_token(self, request, *args, **kwargs):
+    def revoke_token(self, request, *args, **kwargs):
         """注销令牌"""
 
-        serializer = LogoffTokenRequest(data=request.data)
+        serializer = RevokeTokenRequest(data=request.data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
 

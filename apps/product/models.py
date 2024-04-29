@@ -23,7 +23,8 @@ class Product(RefModel):
 
     supplier_set = models.ManyToManyField('data.Supplier', blank=True, related_name='product_set', verbose_name='供应商')
     enable_batch_control = models.BooleanField(default=False, db_index=True, verbose_name='批次控制')
-    shelf_life_days = models.IntegerField(null=True, verbose_name='保质期天数')
+    expiration_days = models.IntegerField(null=True, verbose_name='有效期天数')
+    expiration_warning_days = models.IntegerField(null=True, verbose_name='有效期预警天数')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
@@ -75,8 +76,9 @@ class Batch(Model):
         'product.Product', on_delete=models.CASCADE, related_name='batch_set', verbose_name='产品')
     total_quantity = models.FloatField(default=0, db_index=True, verbose_name='库存数量')
     has_stock = models.BooleanField(default=False, db_index=True, verbose_name='库存状态')
-    production_date = models.DateField(null=True, verbose_name='生产日期')
-    expiry_date = models.DateField(null=True, verbose_name='到期日期')
+    production_date = models.DateField(null=True, db_index=True, verbose_name='生产日期')
+    warning_date = models.DateField(null=True, db_index=True, verbose_name='预警日期')
+    expiry_date = models.DateField(null=True, db_index=True, verbose_name='到期日期')
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
 
     class Meta:

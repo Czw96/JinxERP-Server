@@ -2,27 +2,26 @@ from rest_framework.serializers import Serializer
 from rest_framework import serializers
 
 
-class MakeTokenRequest(Serializer):
-    number = serializers.CharField(label='Team 编号')
+class CreateTokenRequest(Serializer):
     username = serializers.CharField(label='用户名')
     password = serializers.CharField(label='密码')
 
 
-class MakeTokenResponse(Serializer):
+class CreateTokenResponse(Serializer):
     access = serializers.CharField(label='访问令牌')
     refresh = serializers.CharField(label='刷新令牌')
 
 
-class RefreshTokenRequest(Serializer):
+class UpdateTokenRequest(Serializer):
     refresh = serializers.CharField(label='刷新令牌')
 
 
-class LogoffTokenRequest(Serializer):
-    refresh = serializers.CharField(label='刷新令牌')
-
-
-class RefreshTokenResponse(Serializer):
+class UpdateTokenResponse(Serializer):
     access = serializers.CharField(label='访问令牌')
+    refresh = serializers.CharField(label='刷新令牌')
+
+
+class RevokeTokenRequest(Serializer):
     refresh = serializers.CharField(label='刷新令牌')
 
 
@@ -41,11 +40,11 @@ class SetPasswordRequest(Serializer):
 
 
 __all__ = [
-    'MakeTokenRequest',
-    'MakeTokenResponse',
-    'RefreshTokenRequest',
-    'RefreshTokenResponse',
-    'LogoffTokenRequest',
+    'CreateTokenRequest',
+    'CreateTokenResponse',
+    'UpdateTokenRequest',
+    'UpdateTokenResponse',
+    'RevokeTokenRequest',
     'UserInfoResponse',
     'SetPasswordRequest',
 ]
