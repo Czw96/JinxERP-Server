@@ -139,12 +139,12 @@ class UserActionViewSet(FunctionViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @extend_schema(responses={200: UserInfoResponse})
+    @extend_schema(responses={200: UserProfileResponse})
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
-    def info(self, request, *args, **kwargs):
+    def profile(self, request, *args, **kwargs):
         """用户信息"""
 
-        serializer = UserInfoResponse(instance=self.user)
+        serializer = UserProfileResponse(instance=self.user)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(request=SetPasswordRequest, responses={204: None})

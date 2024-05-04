@@ -13,7 +13,7 @@ class IsAuthenticated(BasePermission):
         if not isinstance(request.user, User):
             return False
 
-        team = get_tenant().expiry_time
+        team = get_tenant(request)
         if team.expiry_time < timezone.now():
             raise ValidationError(f'已到期, 到期日期: {team.expiry_time}')
 

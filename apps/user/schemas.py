@@ -25,13 +25,22 @@ class RevokeTokenRequest(Serializer):
     refresh = serializers.CharField(label='刷新令牌')
 
 
-class UserInfoResponse(Serializer):
+class UserProfileResponse(Serializer):
+
+    class WarehouseItem(Serializer):
+        id = serializers.IntegerField(label='仓库ID')
+        number = serializers.CharField(label='编号')
+        name = serializers.CharField(label='名称')
+        is_locked = serializers.BooleanField(label='锁定状态')
+        is_active = serializers.BooleanField(label='激活状态')
+
     id = serializers.IntegerField(label='用户ID')
     number = serializers.CharField(label='编号')
     username = serializers.CharField(label='用户名')
     name = serializers.CharField(label='名称')
     is_manager = serializers.BooleanField(label='管理员状态')
     permissions = serializers.JSONField(label='权限')
+    warehouse_items = serializers.ListField(source='get_warehouse_set', child=WarehouseItem(), label='仓库Items')
 
 
 class SetPasswordRequest(Serializer):
@@ -45,6 +54,6 @@ __all__ = [
     'UpdateTokenRequest',
     'UpdateTokenResponse',
     'RevokeTokenRequest',
-    'UserInfoResponse',
+    'UserProfileResponse',
     'SetPasswordRequest',
 ]
