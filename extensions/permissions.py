@@ -36,12 +36,18 @@ class IsManagerPermission(BasePermission):
 class ModelPermission(BasePermission):
     code = None
     message = '未添加操作权限'
+    methods = {
+        'GET': 'query',
+        'POST': 'create',
+        'PUT': 'update',
+        'DELETE': 'delete',
+    }
 
     def has_permission(self, request, view):
         if request.user.is_manager:
             return True
 
-        code = f'{self.code}.{request.method.lower()}'
+        code = f'{self.code}.{self.methods[request.method]}'
         return code in request.user.permissions
 
 

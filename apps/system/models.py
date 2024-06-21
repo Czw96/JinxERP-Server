@@ -16,13 +16,6 @@ class Domain(DomainMixin):
     pass
 
 
-class PagePermission(Model):
-    """页面权限"""
-
-    name = models.CharField(max_length=20, verbose_name='名称')
-    permissions = models.JSONField(default=list, verbose_name='权限')
-
-
 class ErrorLog(Model):
     """错误日志"""
 
@@ -33,6 +26,5 @@ class ErrorLog(Model):
 __all__ = [
     'Team',
     'Domain',
-    'PagePermission',
     'ErrorLog',
 ]
