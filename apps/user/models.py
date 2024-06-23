@@ -7,7 +7,7 @@ from extensions.models import RefModel
 class Role(Model):
     """角色"""
 
-    name = models.CharField(max_length=60, unique=True, verbose_name='名称')
+    name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
     permissions = models.JSONField(default=list, verbose_name='权限')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
@@ -17,7 +17,7 @@ class Role(Model):
 class User(RefModel):
     """用户"""
 
-    number = models.CharField(max_length=20, unique=True, verbose_name='编号')
+    number = models.CharField(max_length=20, unique=True, verbose_name='编号', error_messages={'unique': '编号已存在'})
     username = models.CharField(max_length=20, verbose_name='用户名')
     password = models.CharField(max_length=120, verbose_name='密码')
     name = models.CharField(max_length=60, verbose_name='名称')
@@ -38,12 +38,12 @@ class User(RefModel):
         if self.is_manager:
             return Warehouse.objects.all()
         return self.warehouse_set.all()
-        
+
 
 class Warehouse(RefModel):
     """仓库"""
 
-    number = models.CharField(max_length=20, unique=True, verbose_name='编号')
+    number = models.CharField(max_length=20, unique=True, verbose_name='编号', error_messages={'unique': '编号已存在'})
     name = models.CharField(max_length=60, verbose_name='名称')
     address = models.CharField(max_length=240, null=True, blank=True, verbose_name='地址')
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
