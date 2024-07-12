@@ -65,5 +65,9 @@ class FunctionPermission(BasePermission):
 
 
 __all__ = [
-    'BasePermission', 'IsAuthenticated', 'IsManagerPermission', 'ModelPermission', 'FunctionPermission',
+    'BasePermission',
+    'IsAuthenticated',
+    'IsManagerPermission',
+    'ModelPermission',
+    'FunctionPermission',
 ]

@@ -60,6 +60,10 @@ class Notification(Model):
     """通知"""
 
 
+class FieldConfig(Model):
+    """字段配置"""
+
+
 __all__ = [
     'Role',
     'User',

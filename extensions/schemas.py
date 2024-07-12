@@ -6,6 +6,16 @@ class MakeNumberResponse(Serializer):
     number = serializers.CharField(label='编号')
 
 
+class InstanceListRequest(Serializer):
+    ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        min_length=1,
+        error_messages={'min_length': '列表不能为空, 请至少提供一个 ID'},
+        label='实例ID',
+    )
+
+
 __all__ = [
     'MakeNumberResponse',
+    'InstanceListRequest',
 ]

@@ -27,9 +27,6 @@ class SupplierCategory(Model):
 
     name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
-    parent = models.ForeignKey(
-        'data.SupplierCategory', on_delete=models.CASCADE, null=True, related_name='supplier_category_set', verbose_name='父级')
-    is_parent = models.BooleanField(default=True, db_index=True, verbose_name='父级状态')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
@@ -39,8 +36,8 @@ class Supplier(RefModel):
 
     number = models.CharField(max_length=20, unique=True, verbose_name='编号', error_messages={'unique': '编号已存在'})
     name = models.CharField(max_length=60, verbose_name='名称')
-    category_set = models.ManyToManyField(
-        'data.SupplierCategory', blank=True, related_name='supplier_set', verbose_name='供应商分类')
+    category = models.ForeignKey(
+        'data.SupplierCategory', on_delete=models.SET_NULL, null=True, related_name='supplier_set', verbose_name='供应商分类')
     contact = models.CharField(max_length=60, null=True, blank=True, verbose_name='联系人')
     phone = models.CharField(max_length=20, null=True, blank=True, verbose_name='手机号')
     address = models.CharField(max_length=240, null=True, blank=True, verbose_name='地址')
@@ -61,9 +58,6 @@ class ClientCategory(Model):
 
     name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
-    parent = models.ForeignKey(
-        'data.ClientCategory', on_delete=models.CASCADE, null=True, related_name='client_category_set', verbose_name='父级')
-    is_parent = models.BooleanField(default=True, db_index=True, verbose_name='父级状态')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
@@ -73,8 +67,8 @@ class Client(RefModel):
 
     number = models.CharField(max_length=20, unique=True, verbose_name='编号', error_messages={'unique': '编号已存在'})
     name = models.CharField(max_length=60, verbose_name='名称')
-    category_set = models.ManyToManyField(
-        'data.ClientCategory', blank=True, related_name='supplier_set', verbose_name='客户分类')
+    category = models.ForeignKey(
+        'data.ClientCategory', on_delete=models.SET_NULL, null=True, related_name='supplier_set', verbose_name='客户分类')
     level = models.CharField(
         max_length=20, choices=ClientLevel.choices, default=ClientLevel.LEVEL0, db_index=True, verbose_name='客户等级')
     contact = models.CharField(max_length=60, null=True, blank=True, verbose_name='联系人')
@@ -97,9 +91,6 @@ class ProductCategory(Model):
 
     name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
-    parent = models.ForeignKey(
-        'data.ProductCategory', on_delete=models.CASCADE, null=True, related_name='product_category_set', verbose_name='父级')
-    is_parent = models.BooleanField(default=True, db_index=True, verbose_name='父级状态')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
@@ -127,9 +118,6 @@ class ChargeCategory(Model):
 
     name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
-    parent = models.ForeignKey(
-        'data.ChargeCategory', on_delete=models.CASCADE, null=True, related_name='charge_category_set', verbose_name='父级')
-    is_parent = models.BooleanField(default=True, db_index=True, verbose_name='父级状态')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 

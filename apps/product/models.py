@@ -11,8 +11,8 @@ class Product(RefModel):
     name = models.CharField(max_length=120, db_index=True, verbose_name='名称')
     barcode = models.CharField(max_length=20, db_index=True, verbose_name='条码')
     spec = models.CharField(max_length=60, null=True, blank=True, verbose_name='规格')
-    category_set = models.ManyToManyField(
-        'data.ProductCategory', blank=True, related_name='product_set', verbose_name='产品分类')
+    category = models.ForeignKey(
+        'data.ProductCategory', on_delete=models.SET_NULL, null=True, related_name='product_set', verbose_name='产品分类')
     main_image = models.ForeignKey(
         'product.ProductImage', on_delete=models.SET_NULL, null=True, related_name='product_set', verbose_name='主图')
     brand = models.ForeignKey(

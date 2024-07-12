@@ -33,5 +33,9 @@ class ServerError(APIException):
 
 
 __all__ = [
-    'AuthenticationFailed', 'NotAuthenticated', 'ValidationError', 'PermissionDenied', 'ServerError',
+    'AuthenticationFailed',
+    'NotAuthenticated',
+    'ValidationError',
+    'PermissionDenied',
+    'ServerError',
 ]
