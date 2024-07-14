@@ -33,7 +33,7 @@ SHARED_APPS = [
     'django.contrib.messages',
     'django.contrib.admin',
 
-    'apps.system',
+    'apps.tenant',
 ]
 
 TENANT_APPS = [
@@ -44,7 +44,7 @@ TENANT_APPS = [
     'django_extensions',
     'debug_toolbar',
 
-    'apps.user',
+    'apps.system',
     'apps.data',
     'apps.product',
     # 'apps.approval',
@@ -195,5 +195,5 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 DATABASE_ROUTERS = [
     'django_tenants.routers.TenantSyncRouter',
 ]
-TENANT_MODEL = 'system.Team'
-TENANT_DOMAIN_MODEL = 'system.Domain'
+TENANT_MODEL = 'tenant.Tenant'
+TENANT_DOMAIN_MODEL = 'tenant.Domain'

@@ -4,8 +4,8 @@ from django.db import transaction
 from django_tenants.utils import tenant_context
 from datetime import timedelta
 
-from apps.system.models import Team, Domain
-from apps.user.models import User
+from apps.tenant.models import Tenant, Domain
+from apps.system.models import User
 
 
 def run(*args):
@@ -16,9 +16,9 @@ def run(*args):
     expiry_time = timezone.now() + timedelta(days=float(activation_days))
 
     with transaction.atomic():
-        team = Team.objects.create(schema_name=register_number, expiry_time=expiry_time)
-        Domain.objects.create(domain=domain_name, tenant=team)
+        tenant = Tenant.objects.create(schema_name=register_number, expiry_time=expiry_time)
+        Domain.objects.create(domain=domain_name, tenant=tenant)
 
-        with tenant_context(team):
+        with tenant_context(tenant):
             User.objects.create(
                 username=username, password=make_password(username), name=username, is_manager=True)

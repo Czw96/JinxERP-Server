@@ -32,8 +32,8 @@ urlpatterns = [
     *static(settings.STATIC_URL, document_root=settings.STATIC_ROOT),
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 
+    path('api/', include('apps.tenant.urls')),
     path('api/', include('apps.system.urls')),
-    path('api/', include('apps.user.urls')),
     path('api/', include('apps.data.urls')),
     path('api/', include('apps.product.urls')),
     # path('api/', include('apps.approval.urls')),

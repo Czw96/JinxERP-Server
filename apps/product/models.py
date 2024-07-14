@@ -45,7 +45,7 @@ class Inventory(Model):
     """库存"""
 
     warehouse = models.ForeignKey(
-        'user.Warehouse', on_delete=models.CASCADE, related_name='inventory_set', verbose_name='仓库')
+        'system.Warehouse', on_delete=models.CASCADE, related_name='inventory_set', verbose_name='仓库')
     product = models.ForeignKey(
         'product.Product', on_delete=models.CASCADE, related_name='inventory_set', verbose_name='产品')
     purchase_price = models.FloatField(null=True, verbose_name='采购单价')
@@ -71,7 +71,7 @@ class Batch(Model):
     inventory = models.ForeignKey(
         'product.Inventory', on_delete=models.CASCADE, related_name='batch_set', verbose_name='库存')
     warehouse = models.ForeignKey(
-        'user.Warehouse', on_delete=models.CASCADE, related_name='batch_set', verbose_name='仓库')
+        'system.Warehouse', on_delete=models.CASCADE, related_name='batch_set', verbose_name='仓库')
     product = models.ForeignKey(
         'product.Product', on_delete=models.CASCADE, related_name='batch_set', verbose_name='产品')
     total_quantity = models.FloatField(default=0, db_index=True, verbose_name='库存数量')

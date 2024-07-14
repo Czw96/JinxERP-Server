@@ -3,7 +3,7 @@ from django_tenants.utils import get_tenant
 from django.utils import timezone
 
 from extensions.exceptions import ValidationError
-from apps.user.models import User
+from apps.system.models import User
 
 
 class IsAuthenticated(BasePermission):
@@ -13,9 +13,9 @@ class IsAuthenticated(BasePermission):
         if not isinstance(request.user, User):
             return False
 
-        team = get_tenant(request)
-        if team.expiry_time < timezone.now():
-            raise ValidationError(f'已到期, 到期日期: {team.expiry_time}')
+        tenant = get_tenant(request)
+        if tenant.expiry_time < timezone.now():
+            raise ValidationError(f'已到期, 到期日期: {tenant.expiry_time}')
 
         if request.user.is_manager:
             return True

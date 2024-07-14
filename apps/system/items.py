@@ -1,5 +1,5 @@
 from extensions.serializers import ModelSerializerEx
-from apps.user.models import *
+from apps.system.models import *
 
 
 class RoleItemSerializer(ModelSerializerEx):
