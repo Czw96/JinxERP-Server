@@ -1,6 +1,10 @@
 from django.contrib.auth.hashers import make_password
+from rest_framework import serializers
+import re
 
 from extensions.serializers import ModelSerializerEx
+from extensions.exceptions import ValidationError
+from extensions.field_type import *
 from apps.system.models import *
 from apps.system.items import *
 
@@ -54,8 +58,57 @@ class WarehouseSerializer(ModelSerializerEx):
         return super().create(validated_data)
 
 
+class FieldConfigSerializer(ModelSerializerEx):
+    model_display = serializers.CharField(source='get_model_display', read_only=True, label='模型')
+    type_display = serializers.CharField(source='get_type_display', read_only=True, label='类型')
+
+    class Meta:
+        model = FieldConfig
+        read_only_fields = ['id', 'model_display', 'type_display', 'update_time', 'create_time']
+        fields = ['name', 'model', 'type', 'code', 'priority', 'remark', 'property', *read_only_fields]
+
+    def validate_code(self, value):
+        if not re.match(r'^[0-9a-zA-Z_]+$', value):
+            raise ValidationError('代码无效: 只能包含字母, 数字和下划线')
+        return value
+
+    def validate(self, attrs):
+        type = attrs['type']
+        property = attrs.get('property', {})
+
+        if type == FieldConfig.DataType.TEXT:
+            serializer = TextFieldProperty(data=property)
+        elif type == FieldConfig.DataType.NUMBER:
+            serializer = NumberFieldProperty(data=property)
+        elif type == FieldConfig.DataType.DATE:
+            serializer = DateFieldProperty(data=property)
+        elif type == FieldConfig.DataType.TIME:
+            serializer = TimeFieldProperty(data=property)
+        elif type == FieldConfig.DataType.SINGLE_CHOICE:
+            serializer = SingleChoiceFieldProperty(data=property)
+        elif type == FieldConfig.DataType.MULTIPLE_CHOICE:
+            serializer = MultipleChoiceFieldProperty(data=property)
+        else:
+            raise ValidationError('字段类型错误')
+
+        serializer.is_valid(raise_exception=True)
+        attrs['property'] = serializer.validated_data
+        return super().validate(attrs)
+
+    def update(self, instance, validated_data):
+        if instance.model != validated_data['model']:
+            raise ValidationError('模型不可修改')
+        if instance.type != validated_data['type']:
+            raise ValidationError('类型不可修改')
+        if instance.code != validated_data['code']:
+            raise ValidationError('代码不可修改')
+
+        return super().update(instance, validated_data)
+
+
 __all__ = [
     'RoleSerializer',
     'UserSerializer',
     'WarehouseSerializer',
+    'FieldConfigSerializer',
 ]

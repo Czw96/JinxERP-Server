@@ -19,8 +19,6 @@ from apps.product.models import *
 
 
 class RoleViewSet(ModelViewSetEx):
-    """角色"""
-
     serializer_class = RoleSerializer
     permission_classes = [IsAuthenticated, IsManagerPermission]
     search_fields = ['name', 'remark']
@@ -51,8 +49,6 @@ class RoleViewSet(ModelViewSetEx):
 
 
 class UserViewSet(ModelViewSetEx):
-    """用户"""
-
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsManagerPermission]
     filterset_class = UserFilter
@@ -78,7 +74,6 @@ class UserViewSet(ModelViewSetEx):
 
 
 class UserActionViewSet(FunctionViewSet):
-    """用户操作"""
 
     @extend_schema(request=CreateTokenRequest, responses={200: CreateTokenResponse})
     @action(detail=False, methods=['post'])
@@ -166,8 +161,6 @@ class UserActionViewSet(FunctionViewSet):
 
 
 class WarehouseViewSet(ModelViewSetEx):
-    """仓库"""
-
     serializer_class = WarehouseSerializer
     permission_classes = [IsAuthenticated, WarehousePermission]
     filterset_fields = ['is_locked', 'is_active']
@@ -218,9 +211,19 @@ class WarehouseViewSet(ModelViewSetEx):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
+class FieldConfigViewSet(ModelViewSetEx):
+    serializer_class = FieldConfigSerializer
+    permission_classes = [IsAuthenticated, IsManagerPermission]
+    filterset_fields = ['model']
+    search_fields = ['name', 'remark']
+    ordering_fields = ['id', 'name', 'update_time']
+    queryset = FieldConfig.objects.all()
+
+
 __all__ = [
     'RoleViewSet',
     'UserViewSet',
     'UserActionViewSet',
     'WarehouseViewSet',
+    'FieldConfigViewSet',
 ]
