@@ -9,7 +9,7 @@ from django.db import transaction
 
 from extensions.permissions import IsAuthenticated, IsManagerPermission
 from extensions.exceptions import ValidationError, AuthenticationFailed, NotAuthenticated
-from extensions.viewsets import ModelViewSetEx, FunctionViewSet
+from extensions.viewsets import ModelViewSetEx, FunctionViewSet, UndoDeleteMixin
 from apps.system.serializers import *
 from apps.system.permissions import *
 from apps.system.filters import *
@@ -18,7 +18,7 @@ from apps.system.models import *
 from apps.product.models import *
 
 
-class RoleViewSet(ModelViewSetEx):
+class RoleViewSet(ModelViewSetEx, UndoDeleteMixin):
     serializer_class = RoleSerializer
     permission_classes = [IsAuthenticated, IsManagerPermission]
     search_fields = ['name', 'remark']
@@ -48,7 +48,7 @@ class RoleViewSet(ModelViewSetEx):
         User.objects.bulk_update(user_set, ['permissions'])
 
 
-class UserViewSet(ModelViewSetEx):
+class UserViewSet(ModelViewSetEx, UndoDeleteMixin):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsManagerPermission]
     filterset_class = UserFilter
@@ -160,7 +160,7 @@ class UserActionViewSet(FunctionViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class WarehouseViewSet(ModelViewSetEx):
+class WarehouseViewSet(ModelViewSetEx, UndoDeleteMixin):
     serializer_class = WarehouseSerializer
     permission_classes = [IsAuthenticated, WarehousePermission]
     filterset_fields = ['is_locked', 'is_active']
@@ -183,6 +183,8 @@ class WarehouseViewSet(ModelViewSetEx):
     @extend_schema(responses={200: WarehouseSerializer})
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, WarehouseLockPermission])
     def lock(self, request, *args, **kwargs):
+        """仓库锁定"""
+
         instance = self.get_object()
         if instance.is_locked:
             raise ValidationError(f'仓库[{instance.name}] 已锁定')
@@ -196,6 +198,8 @@ class WarehouseViewSet(ModelViewSetEx):
     @extend_schema(responses={200: WarehouseSerializer})
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, WarehouseUnlockPermission])
     def unlock(self, request, *args, **kwargs):
+        """仓库解锁"""
+
         instance = self.get_object()
         if not instance.is_locked:
             raise ValidationError(f'仓库[{instance.name}] 已解锁')
@@ -211,13 +215,24 @@ class WarehouseViewSet(ModelViewSetEx):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
-class FieldConfigViewSet(ModelViewSetEx):
-    serializer_class = FieldConfigSerializer
+class ModelFieldViewSet(ModelViewSetEx, UndoDeleteMixin):
+    serializer_class = ModelFieldSerializer
     permission_classes = [IsAuthenticated, IsManagerPermission]
     filterset_fields = ['model']
-    search_fields = ['name', 'remark']
-    ordering_fields = ['id', 'name', 'update_time']
-    queryset = FieldConfig.objects.all()
+    search_fields = ['number', 'name', 'remark']
+    ordering_fields = ['id', 'number', 'name', 'update_time']
+    queryset = ModelField.objects.all()
+
+
+class SystemConfigViewSet(FunctionViewSet):
+
+    @extend_schema(responses={200: FieldConfigResponse(many=True)})
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def field_config(self, request, *args, **kwargs):
+        """字段配置"""
+
+        serializer = FieldConfigResponse(instance=ModelField.objects.all(), many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
 __all__ = [
@@ -225,5 +240,6 @@ __all__ = [
     'UserViewSet',
     'UserActionViewSet',
     'WarehouseViewSet',
-    'FieldConfigViewSet',
+    'ModelFieldViewSet',
+    'SystemConfigViewSet',
 ]

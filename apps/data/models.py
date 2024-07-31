@@ -2,24 +2,29 @@ from django.db.models import Model
 from django.db import models
 
 from extensions.choices import ClientLevel
-from extensions.models import RefModel
+from extensions.models import SoftDeleteMixin, UniqueConstraintEx
 
 
-class Account(RefModel):
+class Account(SoftDeleteMixin, Model):
     """账户"""
 
-    number = models.CharField(max_length=20, unique=True, verbose_name='编号', error_messages={'unique': '编号已存在'})
+    number = models.CharField(max_length=20, unique=True, verbose_name='编号')
     name = models.CharField(max_length=60, verbose_name='名称')
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
     is_active = models.BooleanField(default=True, db_index=True, verbose_name='激活状态')
 
     initial_balance_amount = models.DecimalField(default=0, max_digits=12, decimal_places=2, verbose_name='初期余额')
     balance_amount = models.DecimalField(default=0, max_digits=12, decimal_places=2, db_index=True, verbose_name='余额')
+    extension_data = models.JSONField(default=dict, verbose_name='扩展数据')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    is_deleted = models.BooleanField(default=False, db_index=True, verbose_name='删除状态')
+    delete_time = models.DateTimeField(null=True, verbose_name='删除时间')
 
     class Meta:
-        unique_together = [('name', 'delete_time')]
+        constraints = [
+            UniqueConstraintEx(fields=['name', 'delete_time'], name='account'),
+        ]
 
 
 class SupplierCategory(Model):
@@ -27,14 +32,15 @@ class SupplierCategory(Model):
 
     name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
+    extension_data = models.JSONField(default=dict, verbose_name='扩展数据')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
 
-class Supplier(RefModel):
+class Supplier(SoftDeleteMixin, Model):
     """供应商"""
 
-    number = models.CharField(max_length=20, unique=True, verbose_name='编号', error_messages={'unique': '编号已存在'})
+    number = models.CharField(max_length=20, unique=True, verbose_name='编号')
     name = models.CharField(max_length=60, verbose_name='名称')
     category = models.ForeignKey(
         'data.SupplierCategory', on_delete=models.SET_NULL, null=True, related_name='supplier_set', verbose_name='供应商分类')
@@ -46,11 +52,16 @@ class Supplier(RefModel):
 
     initial_arrears_amount = models.DecimalField(default=0, max_digits=12, decimal_places=2, verbose_name='初期欠款金额')
     arrears_amount = models.DecimalField(default=0, max_digits=12, decimal_places=2, db_index=True, verbose_name='欠款金额')
+    extension_data = models.JSONField(default=dict, verbose_name='扩展数据')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    is_deleted = models.BooleanField(default=False, db_index=True, verbose_name='删除状态')
+    delete_time = models.DateTimeField(null=True, verbose_name='删除时间')
 
     class Meta:
-        unique_together = [('name', 'delete_time')]
+        constraints = [
+            UniqueConstraintEx(fields=['name', 'delete_time'], name='supplier'),
+        ]
 
 
 class ClientCategory(Model):
@@ -58,14 +69,15 @@ class ClientCategory(Model):
 
     name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
+    extension_data = models.JSONField(default=dict, verbose_name='扩展数据')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
 
-class Client(RefModel):
+class Client(SoftDeleteMixin, Model):
     """客户"""
 
-    number = models.CharField(max_length=20, unique=True, verbose_name='编号', error_messages={'unique': '编号已存在'})
+    number = models.CharField(max_length=20, unique=True, verbose_name='编号')
     name = models.CharField(max_length=60, verbose_name='名称')
     category = models.ForeignKey(
         'data.ClientCategory', on_delete=models.SET_NULL, null=True, related_name='supplier_set', verbose_name='客户分类')
@@ -79,11 +91,16 @@ class Client(RefModel):
 
     initial_arrears_amount = models.DecimalField(default=0, max_digits=12, decimal_places=2, verbose_name='初期欠款金额')
     arrears_amount = models.DecimalField(default=0, max_digits=12, decimal_places=2, db_index=True, verbose_name='欠款金额')
+    extension_data = models.JSONField(default=dict, verbose_name='扩展数据')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    is_deleted = models.BooleanField(default=False, db_index=True, verbose_name='删除状态')
+    delete_time = models.DateTimeField(null=True, verbose_name='删除时间')
 
     class Meta:
-        unique_together = [('name', 'delete_time')]
+        constraints = [
+            UniqueConstraintEx(fields=['name', 'delete_time'], name='client'),
+        ]
 
 
 class ProductCategory(Model):
@@ -91,6 +108,7 @@ class ProductCategory(Model):
 
     name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
+    extension_data = models.JSONField(default=dict, verbose_name='扩展数据')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
@@ -100,6 +118,7 @@ class Brand(Model):
 
     name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
+    extension_data = models.JSONField(default=dict, verbose_name='扩展数据')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
@@ -109,6 +128,7 @@ class Unit(Model):
 
     name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
+    extension_data = models.JSONField(default=dict, verbose_name='扩展数据')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
@@ -118,6 +138,7 @@ class ChargeCategory(Model):
 
     name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
+    extension_data = models.JSONField(default=dict, verbose_name='扩展数据')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 

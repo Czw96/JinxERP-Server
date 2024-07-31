@@ -1,15 +1,15 @@
 from rest_framework.viewsets import ViewSet, GenericViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 
-from rest_framework.decorators import action
 
 from extensions.paginations import PageNumberPaginationEx
-from extensions.schemas import InstanceListRequest
+from extensions.schemas import InstanceListRequest, ListDeletedResponse
 
 
 class FunctionViewSet(ViewSet):
@@ -74,6 +74,33 @@ class BatchDestroyModelMixin:
         instances.delete()
 
 
+class UndoDeleteMixin:
+
+    @extend_schema(responses={200: ListDeletedResponse})
+    @action(detail=False, methods=['get'])
+    def deleted(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.queryset.all_with_deleted())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = ListDeletedResponse(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = ListDeletedResponse(queryset, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(request=InstanceListRequest, responses={204: None})
+    @action(detail=True, methods=['delete'])
+    def undo_delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.is_deleted:
+            serializer = self.get_serializer(instance, data={})
+            serializer.is_valid(raise_exception=True)
+            serializer.save({'is_deleted': False, 'delete_time': None})
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class ModelViewSetEx(QueryViewSet, CreateModelMixin, UpdateModelMixin, DestroyModelMixin, BatchDestroyModelMixin):
     """模型视图"""
 
@@ -85,4 +112,5 @@ __all__ = [
     'QueryViewSet',
     'ModelViewSetEx',
     'BatchDestroyModelMixin',
+    'UndoDeleteMixin',
 ]

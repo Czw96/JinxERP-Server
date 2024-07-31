@@ -1,10 +1,10 @@
 from django.db.models import Model
 from django.db import models
 
-from extensions.models import RefModel
+from extensions.models import SoftDeleteMixin, UniqueConstraintEx
 
 
-class Product(RefModel):
+class Product(SoftDeleteMixin, Model):
     """产品"""
 
     number = models.CharField(max_length=20, unique=True, verbose_name='编号', error_messages={'unique': '编号已存在'})
@@ -25,11 +25,16 @@ class Product(RefModel):
     enable_batch_control = models.BooleanField(default=False, db_index=True, verbose_name='批次控制')
     expiration_days = models.IntegerField(null=True, verbose_name='有效期天数')
     expiration_warning_days = models.IntegerField(null=True, verbose_name='有效期预警天数')
+    extension_data = models.JSONField(default=dict, verbose_name='扩展数据')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    is_deleted = models.BooleanField(default=False, db_index=True, verbose_name='删除状态')
+    delete_time = models.DateTimeField(null=True, verbose_name='删除时间')
 
     class Meta:
-        unique_together = [('name', 'spec', 'delete_time')]
+        constraints = [
+            UniqueConstraintEx(fields=['name', 'spec', 'delete_time'], name='product'),
+        ]
 
 
 class ProductImage(Model):
@@ -61,7 +66,9 @@ class Inventory(Model):
     max_quantity = models.FloatField(null=True, verbose_name='最大数量')
 
     class Meta:
-        unique_together = [('warehouse', 'product')]
+        constraints = [
+            UniqueConstraintEx(fields=['warehouse', 'product'], name='inventory'),
+        ]
 
 
 class Batch(Model):
@@ -82,7 +89,9 @@ class Batch(Model):
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
 
     class Meta:
-        unique_together = [('number', 'inventory', 'production_date')]
+        constraints = [
+            UniqueConstraintEx(fields=['number', 'inventory', 'production_date'], name='batch'),
+        ]
 
 
 __all__ = [

@@ -15,7 +15,14 @@ class InstanceListRequest(Serializer):
     )
 
 
+class ListDeletedResponse(Serializer):
+    number = serializers.CharField(label='编号')
+    name = serializers.CharField(label='名称')
+    delete_time = serializers.DateTimeField(label='删除时间')
+
+
 __all__ = [
     'MakeNumberResponse',
     'InstanceListRequest',
+    'ListDeletedResponse',
 ]
