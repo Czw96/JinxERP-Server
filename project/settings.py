@@ -33,16 +33,18 @@ SHARED_APPS = [
     'django.contrib.messages',
     'django.contrib.admin',
 
+    'rest_framework',
+    'drf_spectacular',
+    'drf_spectacular_sidecar',
+    'django_filters',
+    'django_extensions',
+    'debug_toolbar',
+
     'apps.tenant',
 ]
 
 TENANT_APPS = [
-    'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
-    'django_filters',
-    'drf_spectacular',
-    'django_extensions',
-    'debug_toolbar',
 
     'apps.system',
     'apps.data',
@@ -171,6 +173,9 @@ SIMPLE_JWT = {
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Project API',
     'SERVE_AUTHENTICATION': ['extensions.authentications.JWTAuthenticationEx'],
+    # 'SWAGGER_UI_DIST': 'SIDECAR',
+    # 'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    # 'REDOC_DIST': 'SIDECAR',
 }
 
 

@@ -1,7 +1,8 @@
 from django.db.models import Model
 from django.db import models
 
-from extensions.models import SoftDeleteMixin, UniqueConstraintEx
+from extensions.models import ArchiveModel, UniqueConstraintEx
+from extensions.exceptions import ValidationError
 
 
 class Role(Model):
@@ -15,7 +16,7 @@ class Role(Model):
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
 
-class User(SoftDeleteMixin, Model):
+class User(ArchiveModel):
     """用户"""
 
     number = models.CharField(max_length=20, unique=True, verbose_name='编号')
@@ -33,7 +34,7 @@ class User(SoftDeleteMixin, Model):
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     is_deleted = models.BooleanField(default=False, db_index=True, verbose_name='删除状态')
-    delete_time = models.DateTimeField(null=True, verbose_name='删除时间')
+    delete_time = models.DateTimeField(null=True, db_index=True, verbose_name='删除时间')
 
     class Meta:
         constraints = [
@@ -41,13 +42,20 @@ class User(SoftDeleteMixin, Model):
             UniqueConstraintEx(fields=['name', 'delete_time'], name='user'),
         ]
 
+    def clean(self):
+        if User.objects.filter(username=self.username, delete_time=self.delete_time).exists():
+            raise ValidationError('用户名已存在')
+
+        if User.objects.filter(name=self.name, delete_time=self.delete_time).exists():
+            raise ValidationError('名称已存在')
+
     def get_warehouse_set(self):
         if self.is_manager:
             return Warehouse.objects.all()
         return self.warehouse_set.all()
 
 
-class Warehouse(SoftDeleteMixin, Model):
+class Warehouse(ArchiveModel):
     """仓库"""
 
     number = models.CharField(max_length=20, unique=True, verbose_name='编号')
@@ -60,15 +68,19 @@ class Warehouse(SoftDeleteMixin, Model):
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     is_deleted = models.BooleanField(default=False, db_index=True, verbose_name='删除状态')
-    delete_time = models.DateTimeField(null=True, verbose_name='删除时间')
+    delete_time = models.DateTimeField(null=True, db_index=True, verbose_name='删除时间')
 
     class Meta:
         constraints = [
             UniqueConstraintEx(fields=['name', 'delete_time'], name='warehouse'),
         ]
 
+    def clean(self):
+        if Warehouse.objects.filter(name=self.name, delete_time=self.delete_time).exists():
+            raise ValidationError('名称已存在')
 
-class ModelField(SoftDeleteMixin, Model):
+
+class ModelField(ArchiveModel):
     """模型字段"""
 
     class DataModel(models.TextChoices):
@@ -92,18 +104,22 @@ class ModelField(SoftDeleteMixin, Model):
     name = models.CharField(max_length=60, verbose_name='名称')
     model = models.CharField(max_length=20, choices=DataModel, db_index=True, verbose_name='模型')
     type = models.CharField(max_length=20, choices=DataType, verbose_name='类型')
-    priority = models.IntegerField(default=0, null=True, verbose_name='优先级')
+    priority = models.IntegerField(default=0, verbose_name='排序')
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
     property = models.JSONField(default=dict, verbose_name='属性')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     is_deleted = models.BooleanField(default=False, db_index=True, verbose_name='删除状态')
-    delete_time = models.DateTimeField(null=True, verbose_name='删除时间')
+    delete_time = models.DateTimeField(null=True, db_index=True, verbose_name='删除时间')
 
     class Meta:
         constraints = [
             UniqueConstraintEx(fields=['name', 'model', 'delete_time'], name='model_field'),
         ]
+
+    def clean(self):
+        if ModelField.objects.filter(name=self.name, model=self.model, delete_time=self.delete_time).exists():
+            raise ValidationError('名称和模型组合已存在')
 
 
 class Notification(Model):

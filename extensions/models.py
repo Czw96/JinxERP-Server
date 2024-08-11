@@ -4,41 +4,29 @@ from django.db import models
 from django.utils import timezone
 
 
-class SoftDeleteQuerySet(QuerySet):
+class ArchiveQuerySet(QuerySet):
 
     def delete(self) -> int:
         return self.filter(is_deleted=False).update(is_deleted=True, delete_time=timezone.now())
 
 
-class SoftDeleteManager(Manager):
+class ArchiveManager(Manager):
 
-    def get_queryset(self) -> SoftDeleteQuerySet:
-        return SoftDeleteQuerySet(self.model, using=self._db)
-
-    def all(self) -> SoftDeleteQuerySet:
-        return super().filter(is_deleted=False)
-
-    def filter(self, *args, **kwargs) -> SoftDeleteQuerySet:
-        return super().filter(is_deleted=False).filter(*args, **kwargs)
-
-    def exclude(self, *args, **kwargs) -> SoftDeleteQuerySet:
-        return super().filter(is_deleted=False).exclude(*args, **kwargs)
-
-    def all_with_deleted(self) -> SoftDeleteQuerySet:
-        return super().all()
+    def get_queryset(self) -> ArchiveQuerySet:
+        return ArchiveQuerySet(self.model, using=self._db)
 
 
-class SoftDeleteMixin(Model):
+class ArchiveModel(Model):
     is_deleted = models.BooleanField(default=False, db_index=True, verbose_name='删除状态')
-    delete_time = models.DateTimeField(null=True, verbose_name='删除时间')
+    delete_time = models.DateTimeField(null=True, db_index=True, verbose_name='删除时间')
 
-    objects = SoftDeleteManager()
+    objects: ArchiveManager = ArchiveManager()
 
     def delete(self, using=None, keep_parents=False) -> Tuple[int, dict[str, int]]:
         if not self.is_deleted:
             self.is_deleted = True
             self.delete_time = timezone.now()
-            self.save(update_fields=['is_deleted', 'delete_time'])
+            self.save()
         return (0, {})
 
     class Meta:
@@ -79,6 +67,6 @@ class UniqueConstraintEx(UniqueConstraint):
 
 
 __all__ = [
-    'SoftDeleteMixin',
+    'ArchiveModel',
     'UniqueConstraintEx',
 ]

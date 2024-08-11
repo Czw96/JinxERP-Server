@@ -9,7 +9,8 @@ from drf_spectacular.utils import extend_schema
 
 
 from extensions.paginations import PageNumberPaginationEx
-from extensions.schemas import InstanceListRequest, ListDeletedResponse
+from extensions.exceptions import ValidationError
+from extensions.schemas import InstanceListRequest
 
 
 class FunctionViewSet(ViewSet):
@@ -74,35 +75,29 @@ class BatchDestroyModelMixin:
         instances.delete()
 
 
-class UndoDeleteMixin:
-
-    @extend_schema(responses={200: ListDeletedResponse})
-    @action(detail=False, methods=['get'])
-    def deleted(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.queryset.all_with_deleted())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = ListDeletedResponse(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = ListDeletedResponse(queryset, many=True)
-        return Response(serializer.data)
-
-    @extend_schema(request=InstanceListRequest, responses={204: None})
-    @action(detail=True, methods=['delete'])
-    def undo_delete(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.is_deleted:
-            serializer = self.get_serializer(instance, data={})
-            serializer.is_valid(raise_exception=True)
-            serializer.save({'is_deleted': False, 'delete_time': None})
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
 class ModelViewSetEx(QueryViewSet, CreateModelMixin, UpdateModelMixin, DestroyModelMixin, BatchDestroyModelMixin):
     """模型视图"""
+
+
+class ArchiveViewSet(QueryViewSet, CreateModelMixin, UpdateModelMixin, DestroyModelMixin, BatchDestroyModelMixin):
+    """归档视图"""
+
+    def perform_update(self, serializer):
+        if serializer.instance.is_deleted:
+            raise ValidationError('已删除无法编辑')
+        return super().perform_update(serializer)
+
+    @extend_schema(responses={204: None})
+    @action(detail=True, methods=['delete'])
+    def undo(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.is_deleted:
+            instance.is_deleted = False
+            instance.delete_time = None
+            instance.clean()
+            instance.save()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 __all__ = [
@@ -112,5 +107,5 @@ __all__ = [
     'QueryViewSet',
     'ModelViewSetEx',
     'BatchDestroyModelMixin',
-    'UndoDeleteMixin',
+    'ArchiveViewSet',
 ]

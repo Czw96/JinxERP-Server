@@ -1,10 +1,10 @@
 from django.db.models import Model
 from django.db import models
 
-from extensions.models import SoftDeleteMixin, UniqueConstraintEx
+from extensions.models import ArchiveModel, UniqueConstraintEx
 
 
-class Product(SoftDeleteMixin, Model):
+class Product(ArchiveModel):
     """产品"""
 
     number = models.CharField(max_length=20, unique=True, verbose_name='编号', error_messages={'unique': '编号已存在'})
@@ -29,7 +29,7 @@ class Product(SoftDeleteMixin, Model):
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     is_deleted = models.BooleanField(default=False, db_index=True, verbose_name='删除状态')
-    delete_time = models.DateTimeField(null=True, verbose_name='删除时间')
+    delete_time = models.DateTimeField(null=True, db_index=True, verbose_name='删除时间')
 
     class Meta:
         constraints = [

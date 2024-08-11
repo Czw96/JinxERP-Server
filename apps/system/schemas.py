@@ -54,7 +54,7 @@ class FieldConfigResponse(Serializer):
     name = serializers.CharField(label='名称')
     model = serializers.CharField(label='模型')
     type = serializers.CharField(label='类型')
-    priority = serializers.IntegerField(label='优先级')
+    priority = serializers.IntegerField(label='排序')
     property = serializers.JSONField(label='属性')
 
 

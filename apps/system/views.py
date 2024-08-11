@@ -9,7 +9,7 @@ from django.db import transaction
 
 from extensions.permissions import IsAuthenticated, IsManagerPermission
 from extensions.exceptions import ValidationError, AuthenticationFailed, NotAuthenticated
-from extensions.viewsets import ModelViewSetEx, FunctionViewSet, UndoDeleteMixin
+from extensions.viewsets import ModelViewSetEx, FunctionViewSet, ArchiveViewSet
 from apps.system.serializers import *
 from apps.system.permissions import *
 from apps.system.filters import *
@@ -18,7 +18,7 @@ from apps.system.models import *
 from apps.product.models import *
 
 
-class RoleViewSet(ModelViewSetEx, UndoDeleteMixin):
+class RoleViewSet(ModelViewSetEx):
     serializer_class = RoleSerializer
     permission_classes = [IsAuthenticated, IsManagerPermission]
     search_fields = ['name', 'remark']
@@ -48,12 +48,12 @@ class RoleViewSet(ModelViewSetEx, UndoDeleteMixin):
         User.objects.bulk_update(user_set, ['permissions'])
 
 
-class UserViewSet(ModelViewSetEx, UndoDeleteMixin):
+class UserViewSet(ArchiveViewSet):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsManagerPermission]
     filterset_class = UserFilter
-    search_fields = ['username', 'name']
-    ordering_fields = ['id', 'username', 'update_time']
+    search_fields = ['number', 'username', 'name', 'remark']
+    ordering_fields = ['id', 'username', 'update_time', 'delete_time']
     prefetch_related_fields = ['warehouse_set', 'role_set']
     queryset = User.objects.all()
 
@@ -160,12 +160,12 @@ class UserActionViewSet(FunctionViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class WarehouseViewSet(ModelViewSetEx, UndoDeleteMixin):
+class WarehouseViewSet(ArchiveViewSet):
     serializer_class = WarehouseSerializer
     permission_classes = [IsAuthenticated, WarehousePermission]
-    filterset_fields = ['is_locked', 'is_active']
-    search_fields = ['number', 'name']
-    ordering_fields = ['id', 'number', 'update_time']
+    filterset_fields = ['is_locked', 'is_active', 'is_deleted']
+    search_fields = ['number', 'name', 'remark']
+    ordering_fields = ['id', 'number', 'update_time', 'delete_time']
     queryset = Warehouse.objects.all()
 
     def get_queryset(self):
@@ -215,12 +215,12 @@ class WarehouseViewSet(ModelViewSetEx, UndoDeleteMixin):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
-class ModelFieldViewSet(ModelViewSetEx, UndoDeleteMixin):
+class ModelFieldViewSet(ArchiveViewSet):
     serializer_class = ModelFieldSerializer
     permission_classes = [IsAuthenticated, IsManagerPermission]
-    filterset_fields = ['model']
+    filterset_fields = ['model', 'is_deleted']
     search_fields = ['number', 'name', 'remark']
-    ordering_fields = ['id', 'number', 'name', 'update_time']
+    ordering_fields = ['id', 'number', 'name', 'update_time', 'delete_time']
     queryset = ModelField.objects.all()
 
 
@@ -231,7 +231,7 @@ class SystemConfigViewSet(FunctionViewSet):
     def field_config(self, request, *args, **kwargs):
         """字段配置"""
 
-        serializer = FieldConfigResponse(instance=ModelField.objects.all(), many=True)
+        serializer = FieldConfigResponse(instance=ModelField.objects.filter(is_deleted=False), many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
