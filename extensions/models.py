@@ -32,6 +32,12 @@ class ArchiveModel(Model):
             self.save(update_fields=['is_deleted', 'delete_time'])
         return (0, {})
 
+    def undo_delete(self):
+        if self.is_deleted:
+            self.is_deleted = False
+            self.delete_time = None
+            self.save(update_fields=['is_deleted', 'delete_time'])
+
 
 class UniqueConstraintEx(UniqueConstraint):
 
@@ -48,10 +54,6 @@ class UniqueConstraintEx(UniqueConstraint):
         violation_error_code=None,
         violation_error_message=None,
     ):
-        if name and 'unique' not in name:
-            field_names = '_'.join(fields)
-            name = f'{name}_unique_{field_names}'
-
         super().__init__(
             *expressions,
             fields=fields,

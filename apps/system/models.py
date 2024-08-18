@@ -2,7 +2,6 @@ from django.db.models import Model
 from django.db import models
 
 from extensions.models import ArchiveModel, UniqueConstraintEx
-from extensions.exceptions import ValidationError
 
 
 class Role(Model):
@@ -38,16 +37,9 @@ class User(ArchiveModel):
 
     class Meta:
         constraints = [
-            UniqueConstraintEx(fields=['username', 'delete_time'], name='user'),
-            UniqueConstraintEx(fields=['name', 'delete_time'], name='user'),
+            UniqueConstraintEx(fields=['username', 'delete_time'], name='User.unique_username'),
+            UniqueConstraintEx(fields=['name', 'delete_time'], name='User.unique_name'),
         ]
-
-    def validate_unique_together(self):
-        if User.objects.filter(username=self.username, is_deleted=False).exists():
-            raise ValidationError('用户名已存在')
-
-        if User.objects.filter(name=self.name, is_deleted=False).exists():
-            raise ValidationError('名称已存在')
 
     def get_warehouse_set(self):
         if self.is_manager:
@@ -72,12 +64,8 @@ class Warehouse(ArchiveModel):
 
     class Meta:
         constraints = [
-            UniqueConstraintEx(fields=['name', 'delete_time'], name='warehouse'),
+            UniqueConstraintEx(fields=['name', 'delete_time'], name='Warehouse.unique_name'),
         ]
-
-    def validate_unique_together(self):
-        if Warehouse.objects.filter(name=self.name, is_deleted=False).exists():
-            raise ValidationError('名称已存在')
 
 
 class ModelField(ArchiveModel):
@@ -114,12 +102,8 @@ class ModelField(ArchiveModel):
 
     class Meta:
         constraints = [
-            UniqueConstraintEx(fields=['name', 'model', 'delete_time'], name='model_field'),
+            UniqueConstraintEx(fields=['name', 'model', 'delete_time'], name='ModelField.unique_name_model'),
         ]
-
-    def validate_unique_together(self):
-        if ModelField.objects.filter(name=self.name, model=self.model, is_deleted=False).exists():
-            raise ValidationError('名称和模型已存在')
 
 
 class Notification(Model):
