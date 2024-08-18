@@ -21,7 +21,7 @@ class JWTAuthenticationEx(JWTAuthentication):
 
         try:
             validated_token = self.get_validated_token(raw_token)
-            user = User.objects.get(id=validated_token['user_id'])
+            user = User.objects.get(id=validated_token['user_id'], is_deleted=False)
         except KeyError as e:
             raise NotAuthenticated('令牌不包含用户标识') from e
         except User.DoesNotExist as e:

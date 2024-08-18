@@ -1,10 +1,10 @@
 from django.contrib.auth.hashers import make_password
-from rest_framework.validators import UniqueTogetherValidator
+# from rest_framework.validators import UniqueTogetherValidator
 from rest_framework import serializers
 
-from extensions.serializers import ModelSerializerEx
+from extensions.serializers import ModelSerializerEx, UniqueTogetherValidatorEX
 from extensions.exceptions import ValidationError
-from extensions.field_config import *
+from extensions.field_configs import *
 from apps.system.models import *
 from apps.system.items import *
 
@@ -24,12 +24,12 @@ class UserSerializer(ModelSerializerEx):
     class Meta:
         model = User
         read_only_fields = ['id', 'number', 'warehouse_items', 'role_items', 'permissions', 'is_manager',
-                            'update_time', 'create_time']
+                            'update_time', 'create_time', 'is_deleted', 'delete_time']
         fields = ['username', 'name', 'phone', 'warehouse_set', 'role_set', 'remark', 'is_active', 'extension_data',
                   *read_only_fields]
         validators = [
-            UniqueTogetherValidator(ModelField.objects.filter(is_deleted=False), ['username'], '用户名已存在'),
-            UniqueTogetherValidator(ModelField.objects.filter(is_deleted=False), ['name'], '名称已存在'),
+            UniqueTogetherValidatorEX(User.objects.filter(is_deleted=False), ['username'], '用户名已存在'),
+            UniqueTogetherValidatorEX(User.objects.filter(is_deleted=False), ['name'], '名称已存在'),
         ]
 
     def create(self, validated_data):
@@ -56,16 +56,36 @@ class WarehouseSerializer(ModelSerializerEx):
 
     class Meta:
         model = Warehouse
-        read_only_fields = ['id', 'number', 'is_locked', 'update_time', 'create_time']
+        read_only_fields = ['id', 'number', 'is_locked', 'update_time', 'create_time', 'is_deleted', 'delete_time']
         fields = ['name', 'address', 'remark', 'is_active', 'extension_data', *read_only_fields]
-        validators = [
-            UniqueTogetherValidator(ModelField.objects.filter(is_deleted=False), ['name'], '名称已存在'),
-        ]
+        # validators = [
+        #     UniqueTogetherValidatorEX(Warehouse.objects.filter(is_deleted=False), ['name'], '名称已存在'),
+        # ]
+
+    def validate(self, attrs):
+        self.validate_unique(Warehouse.objects.filter(delete_time=None), ['name'], '名称已存在')
+
+        return super().validate(attrs)
+
+    # def validate_empty_values(self, data):
+    #     return super().validate_empty_values(data)
+
+    # def validate_unique_together(self):
+    #     print(11)
+    #     queryset = Warehouse.objects.filter(delete_time=None)
+    #     if self.instance:
+    #         queryset = queryset.exclude(pk=self.instance.pk)
+
+    #     # if Warehouse.objects.filter(name=self.name, is_deleted=False).exists():
+    #     #     raise ValidationError('名称已存在')
 
     def create(self, validated_data):
         total_count = Warehouse.objects.all().count() + 1
         validated_data['number'] = f'W{total_count:03d}'
         return super().create(validated_data)
+
+    def save(self, **kwargs):
+        return super().save(**kwargs)
 
 
 class ModelFieldSerializer(ModelSerializerEx):
@@ -78,7 +98,7 @@ class ModelFieldSerializer(ModelSerializerEx):
                             'is_deleted', 'delete_time']
         fields = ['name', 'model', 'type', 'priority', 'remark', 'property', *read_only_fields]
         validators = [
-            UniqueTogetherValidator(ModelField.objects.filter(is_deleted=False), ['name', 'model'], '名称和模型组合已存在'),
+            UniqueTogetherValidatorEX(ModelField.objects.filter(is_deleted=False), ['name', 'model'], '名称和模型已存在'),
         ]
 
     def validate(self, attrs):

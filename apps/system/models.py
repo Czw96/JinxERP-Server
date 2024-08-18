@@ -42,17 +42,17 @@ class User(ArchiveModel):
             UniqueConstraintEx(fields=['name', 'delete_time'], name='user'),
         ]
 
-    def clean(self):
-        if User.objects.filter(username=self.username, delete_time=self.delete_time).exists():
+    def validate_unique_together(self):
+        if User.objects.filter(username=self.username, is_deleted=False).exists():
             raise ValidationError('用户名已存在')
 
-        if User.objects.filter(name=self.name, delete_time=self.delete_time).exists():
+        if User.objects.filter(name=self.name, is_deleted=False).exists():
             raise ValidationError('名称已存在')
 
     def get_warehouse_set(self):
         if self.is_manager:
-            return Warehouse.objects.all()
-        return self.warehouse_set.all()
+            return Warehouse.objects.filter(is_deleted=False).order_by('name')
+        return self.warehouse_set.filter(is_deleted=False).order_by('name')
 
 
 class Warehouse(ArchiveModel):
@@ -75,8 +75,8 @@ class Warehouse(ArchiveModel):
             UniqueConstraintEx(fields=['name', 'delete_time'], name='warehouse'),
         ]
 
-    def clean(self):
-        if Warehouse.objects.filter(name=self.name, delete_time=self.delete_time).exists():
+    def validate_unique_together(self):
+        if Warehouse.objects.filter(name=self.name, is_deleted=False).exists():
             raise ValidationError('名称已存在')
 
 
@@ -117,9 +117,9 @@ class ModelField(ArchiveModel):
             UniqueConstraintEx(fields=['name', 'model', 'delete_time'], name='model_field'),
         ]
 
-    def clean(self):
-        if ModelField.objects.filter(name=self.name, model=self.model, delete_time=self.delete_time).exists():
-            raise ValidationError('名称和模型组合已存在')
+    def validate_unique_together(self):
+        if ModelField.objects.filter(name=self.name, model=self.model, is_deleted=False).exists():
+            raise ValidationError('名称和模型已存在')
 
 
 class Notification(Model):

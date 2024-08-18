@@ -22,15 +22,15 @@ class ArchiveModel(Model):
 
     objects: ArchiveManager = ArchiveManager()
 
+    class Meta:
+        abstract = True
+
     def delete(self, using=None, keep_parents=False) -> Tuple[int, dict[str, int]]:
         if not self.is_deleted:
             self.is_deleted = True
             self.delete_time = timezone.now()
-            self.save()
+            self.save(update_fields=['is_deleted', 'delete_time'])
         return (0, {})
-
-    class Meta:
-        abstract = True
 
 
 class UniqueConstraintEx(UniqueConstraint):

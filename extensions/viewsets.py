@@ -89,13 +89,16 @@ class ArchiveViewSet(QueryViewSet, CreateModelMixin, UpdateModelMixin, DestroyMo
 
     @extend_schema(responses={204: None})
     @action(detail=True, methods=['delete'])
-    def undo(self, request, *args, **kwargs):
+    def undo_destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.is_deleted:
             instance.is_deleted = False
             instance.delete_time = None
-            instance.clean()
-            instance.save()
+            instance.save(update_fields=['is_deleted', 'delete_time'])
+
+            # instance.validate_unique_together()
+            # serializer = self.get_serializer(instance, data={}, partial=True)
+            # serializer.is_valid(raise_exception=True)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 

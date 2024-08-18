@@ -53,7 +53,7 @@ class UserViewSet(ArchiveViewSet):
     permission_classes = [IsAuthenticated, IsManagerPermission]
     filterset_class = UserFilter
     search_fields = ['number', 'username', 'name', 'remark']
-    ordering_fields = ['id', 'username', 'update_time', 'delete_time']
+    ordering_fields = ['id', 'number', 'username', 'name' 'update_time', 'delete_time']
     prefetch_related_fields = ['warehouse_set', 'role_set']
     queryset = User.objects.all()
 
@@ -84,7 +84,7 @@ class UserActionViewSet(FunctionViewSet):
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
 
-        if not (user := User.objects.filter(username=validated_data['username']).first()):
+        if not (user := User.objects.filter(username=validated_data['username'], is_deleted=False).first()):
             raise ValidationError('用户不存在')
 
         if not check_password(validated_data['password'], user.password):
@@ -165,11 +165,8 @@ class WarehouseViewSet(ArchiveViewSet):
     permission_classes = [IsAuthenticated, WarehousePermission]
     filterset_fields = ['is_locked', 'is_active', 'is_deleted']
     search_fields = ['number', 'name', 'remark']
-    ordering_fields = ['id', 'number', 'update_time', 'delete_time']
+    ordering_fields = ['id', 'number', 'name', 'update_time', 'delete_time']
     queryset = Warehouse.objects.all()
-
-    def get_queryset(self):
-        return self.user.get_warehouse_set()
 
     @transaction.atomic
     def perform_create(self, serializer):
@@ -177,8 +174,7 @@ class WarehouseViewSet(ArchiveViewSet):
         self.user.warehouse_set.add(instance)
 
         # 同步库存
-        Inventory.objects.bulk_create([Inventory(warehouse=instance, product=product)
-                                       for product in Product.objects.filter(include_deleted=True)])
+        Inventory.objects.bulk_create([Inventory(warehouse=instance, product=product) for product in Product.objects.all()])
 
     @extend_schema(responses={200: WarehouseSerializer})
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, WarehouseLockPermission])

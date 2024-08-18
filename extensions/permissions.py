@@ -50,6 +50,10 @@ class ModelPermission(BasePermission):
         code = f'{self.code}.{self.methods[request.method]}'
         return code in request.user.permissions
 
+    @property
+    def OPTION(self):
+        return f'{self.code}.query'
+
 
 class FunctionPermission(BasePermission):
     """功能权限"""
@@ -64,10 +68,24 @@ class FunctionPermission(BasePermission):
         return self.code in request.user.permissions
 
 
+class OptionPermission(BasePermission):
+    """选项权限"""
+
+    code_set = set()
+    message = '未添加操作权限'
+
+    def has_permission(self, request, view):
+        if request.user.is_manager:
+            return True
+
+        return self.code_list.isdisjoint(request.user.permissions)
+
+
 __all__ = [
     'BasePermission',
     'IsAuthenticated',
     'IsManagerPermission',
     'ModelPermission',
     'FunctionPermission',
+    'OptionPermission',
 ]

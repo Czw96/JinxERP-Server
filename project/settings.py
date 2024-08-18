@@ -60,6 +60,7 @@ TENANT_APPS = [
     # 'apps.flow',
     # 'apps.report',
     # 'apps.stats',
+    'apps.option',
 ]
 
 
