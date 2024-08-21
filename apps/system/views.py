@@ -59,8 +59,13 @@ class UserViewSet(ArchiveViewSet):
 
     def perform_destroy(self, instance):
         if instance.is_manager:
-            raise ValidationError('无法删除管理员账号')
+            raise ValidationError('管理员账号无法删除')
         super().perform_destroy(instance)
+
+    def perform_batch_destroy(self, instances):
+        if instances.filter(is_manager=True).exists():
+            raise ValidationError('管理员账号无法删除')
+        return super().perform_batch_destroy(instances)
 
     @extend_schema(responses={204: None})
     @action(detail=True, methods=['post'])
@@ -68,6 +73,9 @@ class UserViewSet(ArchiveViewSet):
         """重置密码"""
 
         instance = self.get_object()
+        if instance.is_manager:
+            raise ValidationError('管理员账号密码无法重置')
+
         instance.password = make_password(instance.username)
         instance.save(update_fields=['password'])
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -171,7 +179,6 @@ class WarehouseViewSet(ArchiveViewSet):
     @transaction.atomic
     def perform_create(self, serializer):
         instance = serializer.save()
-        self.user.warehouse_set.add(instance)
 
         # 同步库存
         Inventory.objects.bulk_create([Inventory(warehouse=instance, product=product) for product in Product.objects.all()])

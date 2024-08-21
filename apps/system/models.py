@@ -7,7 +7,7 @@ from extensions.models import ArchiveModel, UniqueConstraintEx
 class Role(Model):
     """角色"""
 
-    name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
+    name = models.CharField(max_length=60, db_index=True, verbose_name='名称')
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
     permissions = models.JSONField(default=list, verbose_name='权限')
     extension_data = models.JSONField(default=dict, verbose_name='扩展数据')

@@ -7,7 +7,7 @@ from extensions.models import ArchiveModel, UniqueConstraintEx
 class Product(ArchiveModel):
     """产品"""
 
-    number = models.CharField(max_length=20, unique=True, verbose_name='编号', error_messages={'unique': '编号已存在'})
+    number = models.CharField(max_length=20, unique=True, verbose_name='编号')
     name = models.CharField(max_length=120, db_index=True, verbose_name='名称')
     barcode = models.CharField(max_length=20, db_index=True, verbose_name='条码')
     spec = models.CharField(max_length=60, null=True, blank=True, verbose_name='规格')

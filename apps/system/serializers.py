@@ -15,6 +15,9 @@ class RoleSerializer(ModelSerializerEx):
         read_only_fields = ['id', 'update_time', 'create_time']
         fields = ['name', 'remark', 'permissions', 'extension_data', *read_only_fields]
 
+    def validate_unique(self, attrs):
+        self.check_unique(Role.objects.all(), {'name': attrs['name']}, '名称已存在')
+
 
 class UserSerializer(ModelSerializerEx):
     warehouse_items = WarehouseItemSerializer(source='warehouse_set', many=True, read_only=True, label='仓库Items')
@@ -28,8 +31,8 @@ class UserSerializer(ModelSerializerEx):
                   *read_only_fields]
 
     def validate_unique(self, attrs):
-        self.check_unique(User.objects.filter(delete_time=None), {'username': attrs.get('username')}, '用户名已存在')
-        self.check_unique(User.objects.filter(delete_time=None), {'name': attrs.get('name')}, '名称已存在')
+        self.check_unique(User.objects.filter(delete_time=None), {'username': attrs['username']}, '用户名已存在')
+        self.check_unique(User.objects.filter(delete_time=None), {'name': attrs['name']}, '名称已存在')
 
     def create(self, validated_data):
         total_count = User.objects.all().count() + 1
@@ -59,7 +62,7 @@ class WarehouseSerializer(ModelSerializerEx):
         fields = ['name', 'address', 'remark', 'is_active', 'extension_data', *read_only_fields]
 
     def validate_unique(self, attrs):
-        self.check_unique(Warehouse.objects.filter(delete_time=None), {'name': attrs.get('name')}, '名称已存在')
+        self.check_unique(Warehouse.objects.filter(delete_time=None), {'name': attrs['name']}, '名称已存在')
 
     def create(self, validated_data):
         total_count = Warehouse.objects.all().count() + 1
@@ -78,8 +81,8 @@ class ModelFieldSerializer(ModelSerializerEx):
         fields = ['name', 'model', 'type', 'priority', 'remark', 'property', *read_only_fields]
 
     def validate_unique(self, attrs):
-        self.check_unique(ModelField.objects.filter(delete_time=None),
-                          {'name': attrs.get('name'), 'model': attrs.get('model')}, '名称和模型已存在')
+        self.check_unique(
+            ModelField.objects.filter(delete_time=None), {'name': attrs['name'], 'model': attrs['model']}, '名称和模型已存在')
 
     def validate(self, attrs):
         type = attrs['type']

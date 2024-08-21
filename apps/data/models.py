@@ -30,7 +30,7 @@ class Account(ArchiveModel):
 class SupplierCategory(Model):
     """供应商分类"""
 
-    name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
+    name = models.CharField(max_length=60, db_index=True, verbose_name='名称')
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
     extension_data = models.JSONField(default=dict, verbose_name='扩展数据')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
@@ -67,7 +67,7 @@ class Supplier(ArchiveModel):
 class ClientCategory(Model):
     """客户分类"""
 
-    name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
+    name = models.CharField(max_length=60, db_index=True, verbose_name='名称')
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
     extension_data = models.JSONField(default=dict, verbose_name='扩展数据')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
@@ -106,7 +106,7 @@ class Client(ArchiveModel):
 class ProductCategory(Model):
     """产品分类"""
 
-    name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
+    name = models.CharField(max_length=60, db_index=True, verbose_name='名称')
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
     extension_data = models.JSONField(default=dict, verbose_name='扩展数据')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
@@ -116,7 +116,7 @@ class ProductCategory(Model):
 class Brand(Model):
     """品牌"""
 
-    name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
+    name = models.CharField(max_length=60, db_index=True, verbose_name='名称')
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
     extension_data = models.JSONField(default=dict, verbose_name='扩展数据')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
@@ -126,7 +126,7 @@ class Brand(Model):
 class Unit(Model):
     """单位"""
 
-    name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
+    name = models.CharField(max_length=60, db_index=True, verbose_name='名称')
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
     extension_data = models.JSONField(default=dict, verbose_name='扩展数据')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
@@ -136,7 +136,7 @@ class Unit(Model):
 class ChargeCategory(Model):
     """收支分类"""
 
-    name = models.CharField(max_length=60, unique=True, verbose_name='名称', error_messages={'unique': '名称已存在'})
+    name = models.CharField(max_length=60, db_index=True, verbose_name='名称')
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
     extension_data = models.JSONField(default=dict, verbose_name='扩展数据')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
