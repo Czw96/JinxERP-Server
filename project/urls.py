@@ -44,7 +44,7 @@ urlpatterns = [
     # path('api/', include('apps.stock_count.urls')),
     # path('api/', include('apps.stock_transfer.urls')),
     # path('api/', include('apps.finance.urls')),
-    # path('api/', include('apps.flow.urls')),
+    path('api/', include('apps.flow.urls')),
     # path('api/', include('apps.report.urls')),
     # path('api/', include('apps.stats.urls')),
     path('api/', include('apps.option.urls')),

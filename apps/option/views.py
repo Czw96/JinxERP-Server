@@ -17,12 +17,29 @@ from apps.data.models import *
 class RoleOptionViewSet(ListViewSet):
     serializer_class = RoleOptionSerializer
     permission_classes = [IsAuthenticated, IsManagerPermission]
-    search_fields = ['name']
-    ordering_fields = ['id', 'name']
-    ordering = ['name', '-id']
+    ordering = ['name']
     queryset = Role.objects.all()
+
+
+class UserOptionViewSet(ListViewSet):
+    serializer_class = UserOptionSerializer
+    permission_classes = [IsAuthenticated, UserOptionPermission]
+    filterset_fields = ['is_active']
+    ordering = ['name']
+    queryset = User.objects.filter(is_deleted=False)
+
+
+class WarehouseOptionViewSet(ListViewSet):
+    serializer_class = WarehouseOptionSerializer
+    permission_classes = [IsAuthenticated]
+    ordering = ['name']
+
+    def get_queryset(self):
+        return self.user.get_warehouse_set()
 
 
 __all__ = [
     'RoleOptionViewSet',
+    'UserOptionViewSet',
+    'WarehouseOptionViewSet',
 ]

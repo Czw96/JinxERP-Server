@@ -67,12 +67,12 @@ class BatchDestroyModelMixin:
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
 
-        instances = self.get_queryset().filter(id__in=validated_data['ids'])
-        self.perform_batch_destroy(instances)
+        instance_set = self.get_queryset().filter(id__in=validated_data['ids'])
+        self.perform_batch_destroy(instance_set)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def perform_batch_destroy(self, instances):
-        instances.delete()
+    def perform_batch_destroy(self, instance_set):
+        instance_set.delete()
 
 
 class ModelViewSetEx(QueryViewSet, CreateModelMixin, UpdateModelMixin, DestroyModelMixin, BatchDestroyModelMixin):
@@ -99,6 +99,34 @@ class ArchiveViewSet(QueryViewSet, CreateModelMixin, UpdateModelMixin, DestroyMo
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class ExportModelMixin:
+    """"""
+
+    @extend_schema(responses={204: None})
+    @action(detail=False, methods=['get', 'post'])
+    def export_data(self, request, *args, **kwargs):
+        """导出数据"""
+
+        if request.methods == 'GET':
+            instance_ids = self.filter_queryset(self.get_queryset()).values_list('id', flat=True)
+        elif request.methods == 'POST':
+            serializer = InstanceListRequest(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            validated_data = serializer.validated_data
+
+            instance_ids = validated_data['ids']
+            if self.get_queryset().filter(id__in=instance_ids).count() != len(instance_ids):
+                raise ValidationError('导出数据不存在')
+        else:
+            raise ValidationError('导出数据错误')
+        # 导出中能否进行增删改
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ImportModelMixin:
+    """"""
+
+
 __all__ = [
     'FunctionViewSet',
     'GenericViewSetEx',
@@ -107,4 +135,6 @@ __all__ = [
     'ModelViewSetEx',
     'BatchDestroyModelMixin',
     'ArchiveViewSet',
+    'ExportModelMixin',
+    'ImportModelMixin',
 ]

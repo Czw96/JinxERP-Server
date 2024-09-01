@@ -62,10 +62,10 @@ class UserViewSet(ArchiveViewSet):
             raise ValidationError('管理员账号无法删除')
         super().perform_destroy(instance)
 
-    def perform_batch_destroy(self, instances):
-        if instances.filter(is_manager=True).exists():
+    def perform_batch_destroy(self, instance_set):
+        if instance_set.filter(is_manager=True).exists():
             raise ValidationError('管理员账号无法删除')
-        return super().perform_batch_destroy(instances)
+        return super().perform_batch_destroy(instance_set)
 
     @extend_schema(responses={204: None})
     @action(detail=True, methods=['post'])

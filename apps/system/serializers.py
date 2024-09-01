@@ -20,8 +20,8 @@ class RoleSerializer(ModelSerializerEx):
 
 
 class UserSerializer(ModelSerializerEx):
-    warehouse_items = WarehouseItemSerializer(source='warehouse_set', many=True, read_only=True, label='仓库Items')
-    role_items = RoleItemSerializer(source='role_set', many=True, read_only=True, label='角色Items')
+    warehouse_items = WarehouseItemSerializer(source='warehouse_set', many=True, read_only=True, label='仓库')
+    role_items = RoleItemSerializer(source='role_set', many=True, read_only=True, label='角色')
 
     class Meta:
         model = User
@@ -33,6 +33,15 @@ class UserSerializer(ModelSerializerEx):
     def validate_unique(self, attrs):
         self.check_unique(User.objects.filter(delete_time=None), {'username': attrs['username']}, '用户名已存在')
         self.check_unique(User.objects.filter(delete_time=None), {'name': attrs['name']}, '名称已存在')
+
+    def validate_warehouse_set(self, instance_set):
+        for instance in instance_set:
+            if instance.is_deleted:
+                raise ValidationError(f'仓库[{instance.name}] 已删除')
+
+            if not instance.is_active:
+                raise ValidationError(f'仓库[{instance.name}] 未激活')
+        return instance_set
 
     def create(self, validated_data):
         total_count = User.objects.all().count() + 1

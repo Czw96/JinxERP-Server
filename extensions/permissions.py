@@ -36,7 +36,7 @@ class IsManagerPermission(BasePermission):
 class ModelPermission(BasePermission):
     code = None
     message = '未添加操作权限'
-    methods = {
+    method_map = {
         'GET': 'query',
         'POST': 'create',
         'PUT': 'update',
@@ -47,7 +47,7 @@ class ModelPermission(BasePermission):
         if request.user.is_manager:
             return True
 
-        code = f'{self.code}.{self.methods[request.method]}'
+        code = f'{self.code}.{self.method_map[request.method]}'
         return code in request.user.permissions
 
     @property
@@ -66,6 +66,19 @@ class FunctionPermission(BasePermission):
             return True
 
         return self.code in request.user.permissions
+
+
+class QueryPermission:
+    """查询权限"""
+
+    code = None
+
+    @classmethod
+    def has_permission(cls, request):
+        if request.user.is_manager:
+            return True
+
+        return cls.code in request.user.permissions
 
 
 class OptionPermission(BasePermission):
@@ -87,5 +100,6 @@ __all__ = [
     'IsManagerPermission',
     'ModelPermission',
     'FunctionPermission',
+    'QueryPermission',
     'OptionPermission',
 ]

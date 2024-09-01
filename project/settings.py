@@ -57,7 +57,7 @@ TENANT_APPS = [
     # 'apps.stock_count',
     # 'apps.stock_transfer',
     # 'apps.finance',
-    # 'apps.flow',
+    'apps.flow',
     # 'apps.report',
     # 'apps.stats',
     'apps.option',

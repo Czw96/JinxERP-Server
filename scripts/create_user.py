@@ -16,7 +16,7 @@ def run(*args):
     expiry_time = timezone.now() + timedelta(days=float(activation_days))
 
     with transaction.atomic():
-        tenant = Tenant.objects.create(schema_name=register_number, expiry_time=expiry_time)
+        tenant = Tenant.objects.create(number=register_number, schema_name=register_number, expiry_time=expiry_time)
         Domain.objects.create(domain=domain_name, tenant=tenant)
 
         with tenant_context(tenant):

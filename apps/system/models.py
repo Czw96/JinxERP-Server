@@ -43,8 +43,8 @@ class User(ArchiveModel):
 
     def get_warehouse_set(self):
         if self.is_manager:
-            return Warehouse.objects.filter(is_deleted=False).order_by('name')
-        return self.warehouse_set.filter(is_deleted=False).order_by('name')
+            return Warehouse.objects.filter(is_deleted=False)
+        return self.warehouse_set.filter(is_deleted=False)
 
 
 class Warehouse(ArchiveModel):
@@ -77,6 +77,7 @@ class ModelField(ArchiveModel):
         ROLE = ('role', '角色权限')
         USER = ('user', '员工账号')
         WAREHOUSE = ('warehouse', '仓库管理')
+        ACCOUNT = ('account', '结算账户')
 
     class DataType(models.TextChoices):
         """数据类型"""

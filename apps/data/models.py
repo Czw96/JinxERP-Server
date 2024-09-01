@@ -6,7 +6,7 @@ from extensions.models import ArchiveModel, UniqueConstraintEx
 
 
 class Account(ArchiveModel):
-    """账户"""
+    """结算账户"""
 
     number = models.CharField(max_length=20, unique=True, verbose_name='编号')
     name = models.CharField(max_length=60, verbose_name='名称')
@@ -20,10 +20,12 @@ class Account(ArchiveModel):
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     is_deleted = models.BooleanField(default=False, db_index=True, verbose_name='删除状态')
     delete_time = models.DateTimeField(null=True, db_index=True, verbose_name='删除时间')
+    is_exporting = models.BooleanField(default=False, verbose_name='导出状态')
+    is_importing = models.BooleanField(default=False, verbose_name='导入状态')
 
     class Meta:
         constraints = [
-            UniqueConstraintEx(fields=['name', 'delete_time'], name='account'),
+            UniqueConstraintEx(fields=['name', 'delete_time'], name='Account.unique_name'),
         ]
 
 
@@ -60,7 +62,7 @@ class Supplier(ArchiveModel):
 
     class Meta:
         constraints = [
-            UniqueConstraintEx(fields=['name', 'delete_time'], name='supplier'),
+            UniqueConstraintEx(fields=['name', 'delete_time'], name='Supplier.unique_name'),
         ]
 
 
@@ -99,7 +101,7 @@ class Client(ArchiveModel):
 
     class Meta:
         constraints = [
-            UniqueConstraintEx(fields=['name', 'delete_time'], name='client'),
+            UniqueConstraintEx(fields=['name', 'delete_time'], name='Client.unique_name'),
         ]
 
 

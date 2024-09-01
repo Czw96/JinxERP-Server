@@ -4,6 +4,7 @@ from django.db import models
 
 
 class Tenant(TenantMixin):
+    number = models.CharField(max_length=20, unique=True, verbose_name='编号')
     expiry_time = models.DateTimeField(verbose_name='到期时间')
     update_time = models.DateTimeField(auto_now=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
@@ -19,7 +20,9 @@ class Domain(DomainMixin):
 class ErrorLog(Model):
     """错误日志"""
 
-    content = models.TextField(verbose_name='内容')
+    tenant = models.ForeignKey('tenant.Tenant', null=True, on_delete=models.CASCADE)
+    module = models.CharField(max_length=20, null=True, blank=True, verbose_name='模块')
+    content = models.TextField(null=True, blank=True, verbose_name='内容')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
 
 
