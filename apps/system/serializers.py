@@ -130,9 +130,17 @@ class ModelFieldSerializer(ModelSerializerEx):
         return super().update(instance, validated_data)
 
 
+class NotificationSerializer(ModelSerializerEx):
+
+    class Meta:
+        model = Notification
+        fields = ['id', 'title', 'type', 'content', 'has_attachment', 'notifier', 'is_read', 'is_latest', 'create_time']
+
+
 __all__ = [
     'RoleSerializer',
     'UserSerializer',
     'WarehouseSerializer',
     'ModelFieldSerializer',
+    'NotificationSerializer',
 ]

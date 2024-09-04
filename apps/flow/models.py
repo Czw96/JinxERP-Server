@@ -21,7 +21,7 @@ class ExportTask(Model):
     number = models.CharField(max_length=60, null=True, unique=True, verbose_name='编号')
     model = models.CharField(max_length=20, choices=DataModel, db_index=True, verbose_name='模型')
     export_id_list = models.JSONField(default=list, verbose_name='导出 ID 列表')
-    export_file = models.FileField(verbose_name='导出文件')
+    export_file = models.FileField(null=True, verbose_name='导出文件')
     export_count = models.IntegerField(null=True, verbose_name='导出条数')
     status = models.CharField(
         max_length=32, choices=ExportStatus.choices, db_index=True, default=ExportStatus.EXPORTING, verbose_name='导出状态')

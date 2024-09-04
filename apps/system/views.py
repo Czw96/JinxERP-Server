@@ -9,7 +9,7 @@ from django.db import transaction
 
 from extensions.permissions import IsAuthenticated, IsManagerPermission
 from extensions.exceptions import ValidationError, AuthenticationFailed, NotAuthenticated
-from extensions.viewsets import ModelViewSetEx, FunctionViewSet, ArchiveViewSet
+from extensions.viewsets import ModelViewSetEx, FunctionViewSet, ArchiveViewSet, QueryViewSet, DestroyModelMixin
 from apps.system.serializers import *
 from apps.system.permissions import *
 from apps.system.filters import *
@@ -238,6 +238,51 @@ class SystemConfigViewSet(FunctionViewSet):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
+class NotificationViewSet(QueryViewSet, DestroyModelMixin):
+    """通知"""
+
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
+    filterset_fields = ['is_read', 'is_latest']
+    queryset = Notification.objects.all()
+
+    def get_queryset(self):
+        return super().get_queryset().filter(notifier=self.user)
+
+    def perform_destroy(self, instance):
+        if instance.notifier != self.user:
+            raise ValidationError('无法操作')
+        return super().perform_destroy(instance)
+
+    @extend_schema(responses={200: NotificationSerializer})
+    @action(detail=True, methods=['post'])
+    def read(self, request, *args, **kwargs):
+        """标记已读"""
+
+        instance = self.get_object()
+        instance.is_read = True
+        instance.save(update_fields=['is_read'])
+
+        serializer = NotificationSerializer(instance=instance)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(responses={204: None})
+    @action(detail=False, methods=['post'])
+    def read_all(self, request, *args, **kwargs):
+        """全部已读"""
+
+        Notification.objects.filter(notifier=self.user, team=self.team).update(is_read=True)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(responses={204: None})
+    @action(detail=False, methods=['post'])
+    def delete_read(self, request, *args, **kwargs):
+        """删除已读"""
+
+        Notification.objects.filter(notifier=self.user, is_read=True, team=self.team).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 __all__ = [
     'RoleViewSet',
     'UserViewSet',
@@ -245,4 +290,5 @@ __all__ = [
     'WarehouseViewSet',
     'ModelFieldViewSet',
     'SystemConfigViewSet',
+    'NotificationViewSet',
 ]

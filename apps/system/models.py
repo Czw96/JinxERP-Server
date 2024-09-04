@@ -110,6 +110,24 @@ class ModelField(ArchiveModel):
 class Notification(Model):
     """通知"""
 
+    class NotificationType(models.TextChoices):
+        """通知类型"""
+
+        SUCCESS = ('success', '成功')
+        ERROR = ('error', '错误')
+        EXPORT = ('export', '导出')
+
+    title = models.CharField(max_length=20, verbose_name='标题')
+    type = models.CharField(max_length=20, choices=NotificationType.choices, verbose_name='通知类型')
+    content = models.CharField(max_length=240, verbose_name='内容')
+    attachment = models.FileField(null=True, verbose_name='附件')
+    has_attachment = models.BooleanField(default=False, verbose_name='附件状态')
+    notifier = models.ForeignKey(
+        'system.User', on_delete=models.CASCADE, related_name='notification_set', verbose_name='通知人')
+    is_read = models.BooleanField(default=False, db_index=True, verbose_name='已读状态')
+    is_latest = models.BooleanField(default=True, db_index=True, verbose_name='最新状态')
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+
 
 __all__ = [
     'Role',
