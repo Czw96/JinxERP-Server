@@ -1,4 +1,5 @@
 from drf_spectacular.utils import extend_schema
+from drf_spectacular.types import OpenApiTypes
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
@@ -6,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.hashers import make_password, check_password
 from django.db import transaction
+from django.http import FileResponse
+from pathlib import Path
 
 from extensions.permissions import IsAuthenticated, IsManagerPermission
 from extensions.exceptions import ValidationError, AuthenticationFailed, NotAuthenticated
@@ -243,15 +246,14 @@ class NotificationViewSet(QueryViewSet, DestroyModelMixin):
 
     serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated]
-    filterset_fields = ['is_read', 'is_latest']
+    filterset_fields = ['is_read']
     queryset = Notification.objects.all()
 
     def get_queryset(self):
         return super().get_queryset().filter(notifier=self.user)
 
     def perform_destroy(self, instance):
-        if instance.notifier != self.user:
-            raise ValidationError('无法操作')
+        instance.attachment.delete()
         return super().perform_destroy(instance)
 
     @extend_schema(responses={200: NotificationSerializer})
@@ -271,7 +273,7 @@ class NotificationViewSet(QueryViewSet, DestroyModelMixin):
     def read_all(self, request, *args, **kwargs):
         """全部已读"""
 
-        Notification.objects.filter(notifier=self.user, team=self.team).update(is_read=True)
+        Notification.objects.filter(notifier=self.user).update(is_read=True)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(responses={204: None})
@@ -279,8 +281,23 @@ class NotificationViewSet(QueryViewSet, DestroyModelMixin):
     def delete_read(self, request, *args, **kwargs):
         """删除已读"""
 
-        Notification.objects.filter(notifier=self.user, is_read=True, team=self.team).delete()
+        Notification.objects.filter(notifier=self.user, is_read=True).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(responses={200: OpenApiTypes.BINARY})
+    @action(detail=True, methods=['post'])
+    def download(self, request, *args, **kwargs):
+        """下载附件"""
+
+        notification = self.get_object()
+        if not notification.has_attachment:
+            raise ValidationError(f'不存在附件, 无法下载')
+
+        file_path = notification.attachment.path
+        if not Path(file_path).exists():
+            raise ValidationError(f'附件不存在')
+
+        return FileResponse(open(file_path, 'rb'), as_attachment=True, filename=notification.attachment_name)
 
 
 __all__ = [

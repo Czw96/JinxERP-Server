@@ -17,6 +17,9 @@ gunicorn = "*"
 celery = "*"
 psycopg = {extras = ["pool", "binary"], version = "*"}
 django-tenants = "*"
+channels = "*"
+daphne = "*"
+channels-redis = "*"
 
 [dev-packages]
 autopep8 = "*"

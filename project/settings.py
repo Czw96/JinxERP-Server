@@ -25,20 +25,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Application definition
 
 SHARED_APPS = [
+    'daphne',
     'django_tenants',
-    'django.contrib.contenttypes',
-    'django.contrib.auth',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.messages',
-    'django.contrib.admin',
-
     'rest_framework',
     'drf_spectacular',
     'drf_spectacular_sidecar',
     'django_filters',
     'django_extensions',
     'debug_toolbar',
+
+    'django.contrib.contenttypes',
+    'django.contrib.auth',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.messages',
+    'django.contrib.admin',
 
     'apps.tenant',
 ]
@@ -203,3 +204,14 @@ DATABASE_ROUTERS = [
 ]
 TENANT_MODEL = 'tenant.Tenant'
 TENANT_DOMAIN_MODEL = 'tenant.Domain'
+
+
+# Channels
+# https://channels.readthedocs.io/en/latest/index.html
+
+ASGI_APPLICATION = "project.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    },
+}

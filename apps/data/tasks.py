@@ -1,6 +1,7 @@
 from django.core.files.base import ContentFile
 from django_tenants.utils import tenant_context
 from django.utils import timezone
+from django.db import transaction
 from celery import shared_task
 import time
 import json
@@ -10,10 +11,11 @@ from apps.data.models import *
 from apps.data.serializers import *
 from apps.flow.models import ExportTask, ImportTask
 from apps.tenant.models import Tenant, ErrorLog
-from apps.system.models import ModelField
+from apps.system.models import ModelField, Notification
 
 
 @shared_task
+@transaction.atomic
 def account_export_task(tenant_id, export_task_id):
     tenant = Tenant.objects.get(id=tenant_id)
     with tenant_context(tenant):
@@ -46,11 +48,27 @@ def account_export_task(tenant_id, export_task_id):
             export_task.status = ExportTask.ExportStatus.SUCCESS
             export_task.duration = (timezone.localtime() - export_task.create_time).total_seconds()
             export_task.save(update_fields=['status', 'duration'])
+
+            notification = Notification.objects.create(title='导出结算账户',
+                                                       type=Notification.NotificationType.SUCCESS,
+                                                       content=f'结算账户导出成功, 共导出 {export_task.export_count} 条数据.',
+                                                       attachment_name='结算账户列表',
+                                                       attachment_format=Notification.AttachmentFormat.EXCEL,
+                                                       has_attachment=True,
+                                                       notifier=export_task.creator)
+            file_path = f'{tenant.number}/notification_file/{export_task.number}.json'
+            notification.attachment.save(file_path, content_file, save=True)
         except Exception as error:
             export_task.status = ExportTask.ExportStatus.FAILED
             export_task.duration = (timezone.localtime() - export_task.create_time).total_seconds()
             export_task.error_message = str(error)
             export_task.save(update_fields=['status', 'duration', 'error_message'])
+
+            Notification.objects.create(title='导出结算账户',
+                                        type=Notification.NotificationType.ERROR,
+                                        content=f'结算账户导出失败.',
+                                        notifier=export_task.creator)
+
             ErrorLog.objects.create(tenant=tenant, module='结算账户导出', content=str(error))
 
 

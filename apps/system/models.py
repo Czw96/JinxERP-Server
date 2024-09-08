@@ -113,19 +113,28 @@ class Notification(Model):
     class NotificationType(models.TextChoices):
         """通知类型"""
 
+        INFO = ('info', '信息')
         SUCCESS = ('success', '成功')
+        WARNING = ('warning', '警告')
         ERROR = ('error', '错误')
-        EXPORT = ('export', '导出')
+
+    class AttachmentFormat(models.TextChoices):
+        """附件格式类型"""
+
+        EXCEL = ('excel', 'Excel 文件')
+        PDF = ('pdf', 'PDF 文件')
+        IMAGE = ('image', '图片文件')
 
     title = models.CharField(max_length=20, verbose_name='标题')
     type = models.CharField(max_length=20, choices=NotificationType.choices, verbose_name='通知类型')
     content = models.CharField(max_length=240, verbose_name='内容')
     attachment = models.FileField(null=True, verbose_name='附件')
+    attachment_name = models.CharField(max_length=60, null=True, blank=True, verbose_name='附件名称')  
+    attachment_format = models.CharField(max_length=20, choices=AttachmentFormat.choices, null=True, verbose_name='附件格式')
     has_attachment = models.BooleanField(default=False, verbose_name='附件状态')
     notifier = models.ForeignKey(
         'system.User', on_delete=models.CASCADE, related_name='notification_set', verbose_name='通知人')
     is_read = models.BooleanField(default=False, db_index=True, verbose_name='已读状态')
-    is_latest = models.BooleanField(default=True, db_index=True, verbose_name='最新状态')
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
 
 
