@@ -133,5 +133,4 @@ dmypy.json
 apps/*/migrations/*
 !apps/*/migrations/__init__.py
 media/
-trash/
 .DS_Store

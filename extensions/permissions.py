@@ -15,7 +15,7 @@ class IsAuthenticated(BasePermission):
 
         tenant = get_tenant(request)
         if tenant.expiry_time < timezone.now():
-            raise ValidationError(f'已到期, 到期日期: {tenant.expiry_time}')
+            raise ValidationError(f'账号已到期, 到期日期: {tenant.expiry_time}')
 
         if request.user.is_manager:
             return True

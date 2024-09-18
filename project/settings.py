@@ -66,7 +66,6 @@ TENANT_APPS = [
 
 
 INSTALLED_APPS = SHARED_APPS + TENANT_APPS
-
 MIDDLEWARE = [
     'django_tenants.middleware.main.TenantMainMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
@@ -212,6 +211,6 @@ TENANT_DOMAIN_MODEL = 'tenant.Domain'
 ASGI_APPLICATION = "project.asgi.application"
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
     },
 }

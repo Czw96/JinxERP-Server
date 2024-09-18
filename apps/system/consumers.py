@@ -1,27 +1,27 @@
-from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from django.utils import timezone
 
 
-class NotificationConsumer(AsyncWebsocketConsumer):
+class NotificationConsumer(AsyncJsonWebsocketConsumer):
 
     async def connect(self):
-        print("connect:")
-
         await self.accept()
 
-    async def receive(self, text_data=None, bytes_data=None):
+        if not (tenant := self.scope.get('tenant')):
+            await self.send_json({'status_code': 400, 'detail': '账号不存在'})
+            await self.close()
 
-        if text_data:
-            print("Received text message:", text_data)
-            await self.send(text_data=text_data)
-        elif bytes_data:
+        if tenant.expiry_time < timezone.now():
+            await self.send_json({'status_code': 400, 'detail': '账号已到期'})
+            await self.close()
 
-            print("Received bytes message of length:", len(bytes_data))
-            # 注意：回发二进制消息需要确保客户端可以处理它
-            # await self.send(bytes_data=bytes_data)  # 如果有需要的话，可以取消注释这行
+        if not (user := self.scope.get('user')):
+            await self.send_json({'status_code': 401, 'detail': '令牌无效'})
+            await self.close()
 
-    async def disconnect(self, close_code):
-
-        print("WebSocket disconnected:", close_code)
+        if not user.is_active:
+            await self.send_json({'status_code': 400, 'detail': '账号未激活'})
+            await self.close()
 
 
 __all__ = [

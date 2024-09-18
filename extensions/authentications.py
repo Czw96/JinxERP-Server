@@ -1,6 +1,6 @@
 from drf_spectacular.contrib.rest_framework_simplejwt import SimpleJWTScheme
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.exceptions import InvalidToken
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
 from extensions.exceptions import NotAuthenticated
 from apps.system.models import User
@@ -24,10 +24,10 @@ class JWTAuthenticationEx(JWTAuthentication):
             user = User.objects.get(id=validated_token['user_id'], is_deleted=False)
         except KeyError as e:
             raise NotAuthenticated('令牌不包含用户标识') from e
+        except (InvalidToken, TokenError) as e:
+            raise NotAuthenticated('令牌无效') from e
         except User.DoesNotExist as e:
             raise NotAuthenticated('用户不存在') from e
-        except InvalidToken as e:
-            raise NotAuthenticated('令牌无效') from e
 
         return user, validated_token
 
