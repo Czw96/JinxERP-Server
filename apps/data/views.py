@@ -15,7 +15,7 @@ from apps.data.filters import *
 from apps.data.schemas import *
 from apps.data.models import *
 from apps.data.tasks import *
-from apps.flow.models import ExportTask, ImportTask
+from apps.task.models import ExportTask, ImportTask
 
 
 class AccountViewSet(ArchiveViewSet, ExportModelMixin, ImportModelMixin):

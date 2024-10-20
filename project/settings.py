@@ -58,9 +58,10 @@ TENANT_APPS = [
     # 'apps.stock_count',
     # 'apps.stock_transfer',
     # 'apps.finance',
-    'apps.flow',
+    # 'apps.flow',
     # 'apps.report',
     # 'apps.stats',
+    'apps.task',
     'apps.option',
 ]
 
@@ -212,5 +213,21 @@ ASGI_APPLICATION = "project.asgi.application"
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
     },
+}
+
+
+# django-redis
+# https://pypi.org/project/django-redis/
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
 }

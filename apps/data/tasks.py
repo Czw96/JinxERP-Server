@@ -2,16 +2,17 @@ from django.core.files.base import ContentFile
 from django_tenants.utils import tenant_context
 from django.utils import timezone
 from django.db import transaction
+from asgiref.sync import async_to_sync
 from celery import shared_task
 import time
 import json
 
-from extensions.exceptions import ServerError
 from apps.data.models import *
 from apps.data.serializers import *
-from apps.flow.models import ExportTask, ImportTask
+from apps.task.models import ExportTask, ImportTask
 from apps.tenant.models import Tenant, ErrorLog
 from apps.system.models import ModelField, Notification
+from apps.system.consumers import NotificationConsumer
 
 
 @shared_task
@@ -20,7 +21,7 @@ def account_export_task(tenant_id, export_task_id):
     tenant = Tenant.objects.get(id=tenant_id)
     with tenant_context(tenant):
         export_task = ExportTask.objects.get(id=export_task_id)
-        time.sleep(5)
+        # time.sleep(5)
 
         try:
             model_field_set = ModelField.objects.filter(
@@ -58,6 +59,8 @@ def account_export_task(tenant_id, export_task_id):
                                                        notifier=export_task.creator)
             file_path = f'{tenant.number}/notification_file/{export_task.number}.json'
             notification.attachment.save(file_path, content_file, save=True)
+
+            async_to_sync(NotificationConsumer.send_notification)(export_task.creator, {'data': 'dddd'})
         except Exception as error:
             export_task.status = ExportTask.ExportStatus.FAILED
             export_task.duration = (timezone.localtime() - export_task.create_time).total_seconds()
