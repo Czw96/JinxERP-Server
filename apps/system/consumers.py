@@ -3,6 +3,8 @@ from channels.layers import get_channel_layer
 from django.utils import timezone
 from django.core.cache import cache
 
+from apps.system.models import Notification
+
 
 class NotificationConsumer(AsyncJsonWebsocketConsumer):
     consumer_code = 'notification'
@@ -26,11 +28,16 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json({'status_code': 400, 'detail': '账号未激活'}, close=True)
             return
 
+        unread_count = await Notification.objects.filter(notifier=user, is_read=False).acount()
+        await self.send_json({'status_code': 200, 'data': {
+            'unread_count': unread_count,
+            'notification_items': [],
+        }})
+
         cache.set(f'{self.consumer_code}-{user.id}', self.channel_name)
 
     async def disconnect(self, close_code):
         if user := self.scope.get('user'):
-            print(f'{self.consumer_code}-{user.id}')
             cache.delete(f'{self.consumer_code}-{user.id}')
 
     @classmethod
@@ -40,7 +47,12 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
             await channel_layer.send(channel_name, {"type": "handle.send", "data": data})
 
     async def handle_send(self, event):
-        await self.send_json({'status_code': 200, 'results': event['data']})
+        if user := self.scope.get('user'):
+            unread_count = await Notification.objects.filter(notifier=user, is_read=False).acount()
+            await self.send_json({'status_code': 200, 'data': {
+                'unread_count': unread_count,
+                'notification_items': event['data'],
+            }})
 
 
 __all__ = [

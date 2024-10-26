@@ -281,6 +281,14 @@ class NotificationViewSet(QueryViewSet, DestroyModelMixin):
 
     @extend_schema(responses={204: None})
     @action(detail=False, methods=['post'])
+    def delete_unread(self, request, *args, **kwargs):
+        """删除未读"""
+
+        Notification.objects.filter(notifier=self.user, is_read=False).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(responses={204: None})
+    @action(detail=False, methods=['post'])
     def delete_read(self, request, *args, **kwargs):
         """删除已读"""
 

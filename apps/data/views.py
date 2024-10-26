@@ -39,7 +39,7 @@ class AccountViewSet(ArchiveViewSet, ExportModelMixin, ImportModelMixin):
 
         if ExportTask.objects.filter(
                 model=ExportTask.DataModel.ACCOUNT, status=ExportTask.ExportStatus.EXPORTING, creator=self.user).exists():
-            raise ValidationError('已存在导出任务')
+            raise ValidationError('导出任务正在进行中')
 
         queryset = self.get_queryset().filter(is_deleted=False)
         if request.method == 'GET':

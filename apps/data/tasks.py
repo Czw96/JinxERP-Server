@@ -13,6 +13,7 @@ from apps.task.models import ExportTask, ImportTask
 from apps.tenant.models import Tenant, ErrorLog
 from apps.system.models import ModelField, Notification
 from apps.system.consumers import NotificationConsumer
+from apps.system.serializers import NotificationSerializer
 
 
 @shared_task
@@ -21,7 +22,7 @@ def account_export_task(tenant_id, export_task_id):
     tenant = Tenant.objects.get(id=tenant_id)
     with tenant_context(tenant):
         export_task = ExportTask.objects.get(id=export_task_id)
-        # time.sleep(5)
+        time.sleep(3)
 
         try:
             model_field_set = ModelField.objects.filter(
@@ -59,19 +60,22 @@ def account_export_task(tenant_id, export_task_id):
                                                        notifier=export_task.creator)
             file_path = f'{tenant.number}/notification_file/{export_task.number}.json'
             notification.attachment.save(file_path, content_file, save=True)
-
-            async_to_sync(NotificationConsumer.send_notification)(export_task.creator, {'data': 'dddd'})
         except Exception as error:
             export_task.status = ExportTask.ExportStatus.FAILED
             export_task.duration = (timezone.localtime() - export_task.create_time).total_seconds()
             export_task.error_message = str(error)
             export_task.save(update_fields=['status', 'duration', 'error_message'])
 
-            Notification.objects.create(title='导出结算账户',
-                                        type=Notification.NotificationType.ERROR,
-                                        content=f'结算账户导出失败.',
-                                        notifier=export_task.creator)
+            notification = Notification.objects.create(title='导出结算账户',
+                                                       type=Notification.NotificationType.ERROR,
+                                                       content=f'结算账户导出失败.',
+                                                       notifier=export_task.creator)
+            ErrorLog.objects.create(tenant=tenant, module='结算账户导出', content=str(error))
 
+        try:
+            serializer = NotificationSerializer(instance=notification)
+            async_to_sync(NotificationConsumer.send_notification)(export_task.creator, [serializer.data])
+        except Exception as error:
             ErrorLog.objects.create(tenant=tenant, module='结算账户导出', content=str(error))
 
 
