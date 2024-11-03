@@ -72,12 +72,7 @@ class AccountViewSet(ArchiveViewSet, ExportModelMixin, ImportModelMixin):
         export_task.save(update_fields=['number'])
 
         Account.objects.filter(id__in=instance_ids).update(is_exporting=True)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @extend_schema(responses={204: None})
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, AccountExportPermission])
-    def stop_export(self, request, *args, **kwargs):
-        """停止导出"""
+        return Response(data={'task_number': task_number}, status=status.HTTP_204_NO_CONTENT)
 
 
 __all__ = [

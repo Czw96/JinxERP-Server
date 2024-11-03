@@ -22,7 +22,7 @@ def account_export_task(tenant_id, export_task_id):
     tenant = Tenant.objects.get(id=tenant_id)
     with tenant_context(tenant):
         export_task = ExportTask.objects.get(id=export_task_id)
-        time.sleep(3)
+        time.sleep(1)
 
         try:
             model_field_set = ModelField.objects.filter(
