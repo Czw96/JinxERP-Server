@@ -26,6 +26,12 @@ class PermissionDenied(APIException):
     default_code = 'permission_denied'
 
 
+class NotFound(APIException):
+    status_code = status.HTTP_404_NOT_FOUND
+    default_detail = '无数据'
+    default_code = 'not_found'
+
+
 class ServerError(APIException):
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     default_detail = '服务器错误'
@@ -37,5 +43,6 @@ __all__ = [
     'NotAuthenticated',
     'ValidationError',
     'PermissionDenied',
+    'NotFound',
     'ServerError',
 ]

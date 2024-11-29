@@ -175,9 +175,6 @@ SIMPLE_JWT = {
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Project API',
     'SERVE_AUTHENTICATION': ['extensions.authentications.JWTAuthenticationEx'],
-    # 'SWAGGER_UI_DIST': 'SIDECAR',
-    # 'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
-    # 'REDOC_DIST': 'SIDECAR',
 }
 
 
@@ -209,25 +206,26 @@ TENANT_DOMAIN_MODEL = 'tenant.Domain'
 # Channels
 # https://channels.readthedocs.io/en/latest/index.html
 
-ASGI_APPLICATION = "project.asgi.application"
+ASGI_APPLICATION = 'project.asgi.application'
 CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
         },
     },
 }
 
 
-# django-redis
-# https://pypi.org/project/django-redis/
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
-    }
-}
+# # django-redis
+# # https://pypi.org/project/django-redis/
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'TIMEOUT': None,
+#         'LOCATION': 'redis://127.0.0.1:6379/1',
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#         }
+#     }
+# }

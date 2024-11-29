@@ -14,6 +14,7 @@ import os
 
 from extensions.middlewares import WebSocketAuthMiddleware
 from apps.system.consumers import *
+from apps.task.consumers import *
 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project.settings')
@@ -27,7 +28,7 @@ application = ProtocolTypeRouter({
         WebSocketAuthMiddleware(
             URLRouter([
                 path('ws/notifications/', NotificationConsumer.as_asgi()),
-                path('ws/tasks/', NotificationConsumer.as_asgi()),
+                path('ws/export_tasks/', ExportTaskConsumer.as_asgi()),
             ]))
     ),
 })

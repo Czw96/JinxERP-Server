@@ -20,7 +20,6 @@ class Domain(DomainMixin):
 class ErrorLog(Model):
     """错误日志"""
 
-    tenant = models.ForeignKey('tenant.Tenant', null=True, on_delete=models.CASCADE)
     module = models.CharField(max_length=20, null=True, blank=True, verbose_name='模块')
     content = models.TextField(null=True, blank=True, verbose_name='内容')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')

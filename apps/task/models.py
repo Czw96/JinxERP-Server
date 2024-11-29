@@ -15,7 +15,7 @@ class ExportTask(Model):
 
         EXPORTING = ('exporting', '导出中')
         CANCELLED = ('cancelled', '已取消')
-        SUCCESS = ('success', '导出成功')
+        COMPLETED = ('completed', '已完成')
         FAILED = ('failed', '导出失败')
 
     number = models.CharField(max_length=60, null=True, unique=True, verbose_name='编号')
@@ -44,7 +44,7 @@ class ImportTask(Model):
 
         IMPORTING = ('importing', '导入中')
         CANCELLED = ('cancelled', '已取消')
-        SUCCESS = ('success', '导入成功')
+        COMPLETED = ('completed', '已完成')
         FAILED = ('failed', '导入失败')
 
     number = models.CharField(max_length=60, unique=True, verbose_name='任务编号')

@@ -4,11 +4,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
+from django.utils import timezone
+from celery.result import AsyncResult
 
 from extensions.permissions import IsAuthenticated
 from extensions.exceptions import ValidationError
 from extensions.viewsets import ModelViewSetEx, ArchiveViewSet, ExportModelMixin, ImportModelMixin
-from extensions.schemas import InstanceListRequest
+from extensions.schemas import InstanceListRequest, ExportTaskResponse, ImportTaskResponse
 from apps.data.serializers import *
 from apps.data.permissions import *
 from apps.data.filters import *
@@ -31,7 +33,7 @@ class AccountViewSet(ArchiveViewSet, ExportModelMixin, ImportModelMixin):
             raise ValidationError('数据被占用, 无法删除')
         return super().perform_destroy(instance)
 
-    @extend_schema(responses={204: None})
+    @extend_schema(responses={200: ExportTaskResponse})
     @action(detail=False, methods=['get', 'post'], permission_classes=[IsAuthenticated, AccountExportPermission])
     @transaction.atomic
     def export_data(self, request, *args, **kwargs):
@@ -67,12 +69,31 @@ class AccountViewSet(ArchiveViewSet, ExportModelMixin, ImportModelMixin):
                                                 export_count=len(instance_ids),
                                                 creator=self.user)
         tenant = get_tenant(request)
-        task_number = account_export_task.delay(tenant.id, export_task.id)
-        export_task.number = task_number
+        async_task = account_export_task.delay(tenant.id, export_task.id)
+        export_task.number = async_task.id
         export_task.save(update_fields=['number'])
 
         Account.objects.filter(id__in=instance_ids).update(is_exporting=True)
-        return Response(data={'task_number': task_number}, status=status.HTTP_204_NO_CONTENT)
+        return Response(data={'task_number': export_task.number}, status=status.HTTP_200_OK)
+
+    @extend_schema(responses={204: None})
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, AccountExportPermission])
+    @transaction.atomic
+    def cancel_export(self, request, *args, **kwargs):
+        """取消导出"""
+
+        if not (export_task := ExportTask.objects.filter(
+                model=ExportTask.DataModel.ACCOUNT, status=ExportTask.ExportStatus.EXPORTING, creator=self.user).first()):
+            raise ValidationError('导出任务不存在')
+
+        async_result = AsyncResult(export_task.number)
+        async_result.revoke(terminate=True)
+
+        export_task.status = ExportTask.ExportStatus.CANCELLED
+        export_task.duration = (timezone.localtime() - export_task.create_time).total_seconds()
+        export_task.save(update_fields=['status', 'duration'])
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 __all__ = [

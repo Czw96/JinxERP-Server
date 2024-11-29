@@ -61,7 +61,7 @@ class ExportTaskViewSet(ModelViewSetEx):
         """下载"""
 
         export_task = self.get_object()
-        if export_task.status != ExportTask.ExportStatus.SUCCESS:
+        if export_task.status != ExportTask.ExportStatus.COMPLETED:
             raise ValidationError(f'导出任务未成功或正在进行中, 无法下载')
 
         file_path = export_task.export_file.path

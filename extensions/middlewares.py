@@ -26,8 +26,7 @@ class WebSocketAuthMiddleware:
         self.inner = inner
 
     async def get_tenant(self, scope):
-        headers = {key.decode(): value.decode() for key, value in scope['headers']}
-        if not (hostname := headers.get('host')):
+        if not (hostname := scope['headers'].get('host')):
             return None
 
         try:
@@ -40,12 +39,11 @@ class WebSocketAuthMiddleware:
 
     @database_sync_to_async
     def get_user(self, scope):
-        query_params = parse_qs(scope['query_string'].decode())
-        query_params = {key: values[0] for key, values in query_params.items()}
-        if not (raw_token := query_params.get('token')):
+        if not (raw_token := scope['query_params'].get('token')):
             return None
 
         try:
+            print(raw_token)
             access_token = AccessToken(raw_token)
             payload = access_token.payload
         except (InvalidToken, TokenError):
@@ -64,6 +62,8 @@ class WebSocketAuthMiddleware:
             return None
 
     async def __call__(self, scope, receive, send):
+        scope['headers'] = {key.decode(): value.decode() for key, value in scope['headers']}
+        scope['query_params'] = {key: values[0] for key, values in parse_qs(scope['query_string'].decode()).items()}
         scope['tenant'] = await self.get_tenant(scope)
         scope['user'] = await self.get_user(scope)
         return await self.inner(scope, receive, send)
