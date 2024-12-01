@@ -48,12 +48,13 @@ class AsyncJsonWebsocketConsumerEx(AsyncJsonWebsocketConsumer):
             await self.send_json({'status_code': 500, 'detail': str(error)}, close=True)
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(f'{self.consumer_code}.{self.user.id}', self.channel_name)
+        if self.user:
+            await self.channel_layer.group_discard(f'{self.consumer_code}.{self.user.id}', self.channel_name)
 
     @classmethod
     async def send_data(cls, user, data):
         channel_layer = get_channel_layer()
-        await channel_layer.group_send(f'{cls.consumer_code}.{user.id}', {"type": "handle.event", "data": data})
+        await channel_layer.group_send(f'{cls.consumer_code}.{user.id}', {'type': 'handle.event', 'data': data})
 
     async def handle_event(self, event):
         ...

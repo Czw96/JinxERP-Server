@@ -43,7 +43,6 @@ class WebSocketAuthMiddleware:
             return None
 
         try:
-            print(raw_token)
             access_token = AccessToken(raw_token)
             payload = access_token.payload
         except (InvalidToken, TokenError):
