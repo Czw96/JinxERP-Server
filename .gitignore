@@ -130,7 +130,5 @@ dmypy.json
 
 # Project
 .vscode/
-apps/*/migrations/*
-!apps/*/migrations/__init__.py
 media/
 .DS_Store

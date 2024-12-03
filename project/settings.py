@@ -11,16 +11,29 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 '''
 
 from datetime import timedelta
-from configs.django import *
 from pathlib import Path
+import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
+
+# SECURITY WARNING: keep the secret key used in production secret!
+
+SECRET_KEY = '84d18a64-52fe-46ba-990c-05d4f9177218'
+
+
+# SECURITY WARNING: don't run with debug turned on in production!
+
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
+
+ALLOWED_HOSTS = [os.getenv('HOST', '*')]
+
 
 # Application definition
 
@@ -64,7 +77,6 @@ TENANT_APPS = [
     'apps.task',
     'apps.option',
 ]
-
 
 INSTALLED_APPS = SHARED_APPS + TENANT_APPS
 MIDDLEWARE = [
@@ -118,6 +130,21 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+# Database
+# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+
+DATABASES = {
+    'default': {
+        "ENGINE": "django_tenants.postgresql_backend",
+        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+        'PORT': os.getenv('DB_PORT', '5432'),
+        'USER': os.getenv('DB_USER', 'admin'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'admin@1996'),
+        'NAME': os.getenv('DB_NAME', 'jinx_erp_v2'),
+    }
+}
 
 
 # Internationalization
@@ -187,7 +214,7 @@ INTERNAL_IPS = ['127.0.0.1']
 # Celery
 # https://docs.celeryq.dev/en/latest/index.html
 
-CELERY_BROKER_URL = 'amqp://guest:guest@127.0.0.1:5672//'
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'amqp://guest:guest@127.0.0.1:5672//')
 CELERY_TIMEZONE = 'Asia/Shanghai'
 CELERY_CONFIRM_LONG_RUNNING_TASKS_ON_CONNECTION_LOSS = True
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
@@ -211,7 +238,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.pubsub.RedisPubSubChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
+            'hosts': [os.getenv('CHANNEL_BROKER_URL', 'redis://:@127.0.0.1:6379/0')],
         },
     },
 }
@@ -219,6 +246,7 @@ CHANNEL_LAYERS = {
 
 # # django-redis
 # # https://pypi.org/project/django-redis/
+
 # CACHES = {
 #     'default': {
 #         'BACKEND': 'django_redis.cache.RedisCache',

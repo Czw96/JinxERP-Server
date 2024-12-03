@@ -1,0 +1,38 @@
+networks:
+  default-network:
+    external: true
+
+services:
+  server:
+    container_name: jinx_erp_v2_server
+    build: .
+    command: gunicorn project.wsgi:application -c gunicorn.py
+    volumes:
+      - .:/jinx_erp_v2
+    ports:
+      - "9000:9000"
+    restart: always
+    networks:
+      - default-network
+
+  websocket:
+    container_name: jinx_erp_v2_websocket
+    build: .
+    command: daphne -b 0.0.0.0 -p 9900 project.asgi:application
+    volumes:
+      - .:/jinx_erp_v2
+    ports:
+      - "9900:9900"
+    restart: always
+    networks:
+      - default-network
+
+  celery:
+    container_name: jinx_erp_v2_celery
+    build: .
+    command: celery -A project worker -l INFO
+    volumes:
+      - .:/jinx_erp_v2
+    restart: always
+    networks:
+      - default-network
