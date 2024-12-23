@@ -13,7 +13,7 @@ class AccountSerializer(ModelSerializerEx):
         fields = ['name', 'remark', 'is_active', 'extension_data', *read_only_fields]
 
     def validate_unique(self, attrs):
-        self.check_unique(Account.objects.filter(delete_time=None), {'name': attrs['name']}, '名称已存在')
+        self.check_unique(Account.objects.filter(delete_time=None), {'name': attrs['name']}, '该名称已被使用')
 
     def create(self, validated_data):
         total_count = Account.objects.all().count() + 1
@@ -22,7 +22,7 @@ class AccountSerializer(ModelSerializerEx):
 
     def update(self, instance, validated_data):
         if instance.is_exporting or instance.is_importing:
-            raise ValidationError('数据被占用, 无法编辑')
+            raise ValidationError('数据被导入或导出占用, 暂时无法编辑')
         return super().update(instance, validated_data)
 
 

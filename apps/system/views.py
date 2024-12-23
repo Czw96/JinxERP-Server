@@ -189,6 +189,13 @@ class WarehouseViewSet(ArchiveViewSet):
         # 同步库存
         Inventory.objects.bulk_create([Inventory(warehouse=instance, product=product) for product in Product.objects.all()])
 
+    @transaction.atomic
+    def perform_destroy(self, instance):
+        # 解除用户关联
+        for user in instance.user_set.all():
+            user.warehouse_set.remove(instance)
+        return super().perform_destroy(instance)
+
     @extend_schema(responses={200: WarehouseSerializer})
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, WarehouseLockPermission])
     def lock(self, request, *args, **kwargs):

@@ -16,7 +16,7 @@ class RoleSerializer(ModelSerializerEx):
         fields = ['name', 'remark', 'permissions', 'extension_data', *read_only_fields]
 
     def validate_unique(self, attrs):
-        self.check_unique(Role.objects.all(), {'name': attrs['name']}, '名称已存在')
+        self.check_unique(Role.objects.all(), {'name': attrs['name']}, '该名称已被使用')
 
 
 class UserSerializer(ModelSerializerEx):
@@ -31,8 +31,8 @@ class UserSerializer(ModelSerializerEx):
                   *read_only_fields]
 
     def validate_unique(self, attrs):
-        self.check_unique(User.objects.filter(delete_time=None), {'username': attrs['username']}, '用户名已存在')
-        self.check_unique(User.objects.filter(delete_time=None), {'name': attrs['name']}, '名称已存在')
+        self.check_unique(User.objects.filter(delete_time=None), {'username': attrs['username']}, '该用户名已被使用')
+        self.check_unique(User.objects.filter(delete_time=None), {'name': attrs['name']}, '该名称已被使用')
 
     def validate_warehouse_set(self, instance_set):
         for instance in instance_set:
@@ -71,7 +71,7 @@ class WarehouseSerializer(ModelSerializerEx):
         fields = ['name', 'address', 'remark', 'is_active', 'extension_data', *read_only_fields]
 
     def validate_unique(self, attrs):
-        self.check_unique(Warehouse.objects.filter(delete_time=None), {'name': attrs['name']}, '名称已存在')
+        self.check_unique(Warehouse.objects.filter(delete_time=None), {'name': attrs['name']}, '该名称已被使用')
 
     def create(self, validated_data):
         total_count = Warehouse.objects.all().count() + 1
@@ -91,7 +91,7 @@ class ModelFieldSerializer(ModelSerializerEx):
 
     def validate_unique(self, attrs):
         self.check_unique(
-            ModelField.objects.filter(delete_time=None), {'name': attrs['name'], 'model': attrs['model']}, '名称和模型已存在')
+            ModelField.objects.filter(delete_time=None), {'name': attrs['name'], 'model': attrs['model']}, '该名称已被使用')
 
     def validate(self, attrs):
         type = attrs['type']
