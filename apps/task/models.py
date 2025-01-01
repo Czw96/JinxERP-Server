@@ -47,7 +47,7 @@ class ImportTask(Model):
         COMPLETED = ('completed', '已完成')
         FAILED = ('failed', '导入失败')
 
-    number = models.CharField(max_length=60, unique=True, verbose_name='任务编号')
+    number = models.CharField(max_length=60, unique=True, verbose_name='编号')
     model = models.CharField(max_length=20, choices=DataModel, db_index=True, verbose_name='模型')
     import_file = models.FileField(verbose_name='导入文件')
     import_count = models.IntegerField(null=True, verbose_name='导入条数')

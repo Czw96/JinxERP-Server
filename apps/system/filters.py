@@ -10,7 +10,7 @@ class UserFilter(FilterSet):
 
     class Meta:
         model = User
-        fields = ['role', 'warehouse', 'is_active', 'is_deleted']
+        fields = ['role', 'warehouse', 'is_enabled', 'is_deleted']
 
 
 __all__ = [

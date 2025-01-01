@@ -177,7 +177,7 @@ class UserActionViewSet(FunctionViewSet):
 class WarehouseViewSet(ArchiveViewSet):
     serializer_class = WarehouseSerializer
     permission_classes = [IsAuthenticated, WarehousePermission]
-    filterset_fields = ['is_locked', 'is_active', 'is_deleted']
+    filterset_fields = ['is_locked', 'is_enabled', 'is_deleted']
     search_fields = ['number', 'name', 'remark']
     ordering_fields = ['id', 'number', 'name', 'update_time', 'delete_time']
     queryset = Warehouse.objects.all()

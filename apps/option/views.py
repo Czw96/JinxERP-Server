@@ -24,7 +24,7 @@ class RoleOptionViewSet(ListViewSet):
 class UserOptionViewSet(ListViewSet):
     serializer_class = UserOptionSerializer
     permission_classes = [IsAuthenticated, UserOptionPermission]
-    filterset_fields = ['is_active']
+    filterset_fields = ['is_enabled']
     ordering = ['name']
     queryset = User.objects.filter(is_deleted=False)
 

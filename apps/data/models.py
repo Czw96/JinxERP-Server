@@ -11,7 +11,7 @@ class Account(ArchiveModel):
     number = models.CharField(max_length=20, unique=True, verbose_name='编号')
     name = models.CharField(max_length=60, verbose_name='名称')
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
-    is_active = models.BooleanField(default=True, db_index=True, verbose_name='激活状态')
+    is_enabled = models.BooleanField(default=True, db_index=True, verbose_name='启用状态')
 
     initial_balance_amount = models.DecimalField(default=0, max_digits=12, decimal_places=2, verbose_name='初期余额')
     balance_amount = models.DecimalField(default=0, max_digits=12, decimal_places=2, db_index=True, verbose_name='余额')
@@ -20,8 +20,6 @@ class Account(ArchiveModel):
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     is_deleted = models.BooleanField(default=False, db_index=True, verbose_name='删除状态')
     delete_time = models.DateTimeField(null=True, db_index=True, verbose_name='删除时间')
-    is_exporting = models.BooleanField(default=False, verbose_name='导出状态')
-    is_importing = models.BooleanField(default=False, verbose_name='导入状态')
 
     class Meta:
         constraints = [
@@ -50,7 +48,7 @@ class Supplier(ArchiveModel):
     phone = models.CharField(max_length=20, null=True, blank=True, verbose_name='手机号')
     address = models.CharField(max_length=240, null=True, blank=True, verbose_name='地址')
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
-    is_active = models.BooleanField(default=True, db_index=True, verbose_name='激活状态')
+    is_enabled = models.BooleanField(default=True, db_index=True, verbose_name='启用状态')
 
     initial_arrears_amount = models.DecimalField(default=0, max_digits=12, decimal_places=2, verbose_name='初期欠款金额')
     arrears_amount = models.DecimalField(default=0, max_digits=12, decimal_places=2, db_index=True, verbose_name='欠款金额')
@@ -89,7 +87,7 @@ class Client(ArchiveModel):
     phone = models.CharField(max_length=20, null=True, blank=True, verbose_name='手机号')
     address = models.CharField(max_length=240, null=True, blank=True, verbose_name='地址')
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
-    is_active = models.BooleanField(default=True, db_index=True, verbose_name='激活状态')
+    is_enabled = models.BooleanField(default=True, db_index=True, verbose_name='启用状态')
 
     initial_arrears_amount = models.DecimalField(default=0, max_digits=12, decimal_places=2, verbose_name='初期欠款金额')
     arrears_amount = models.DecimalField(default=0, max_digits=12, decimal_places=2, db_index=True, verbose_name='欠款金额')

@@ -19,7 +19,7 @@ class Product(ArchiveModel):
         'data.Brand', on_delete=models.SET_NULL, null=True, related_name='product_set', verbose_name='品牌')
     unit = models.CharField(max_length=20, null=True, blank=True, verbose_name='单位')
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
-    is_active = models.BooleanField(default=True, db_index=True, verbose_name='激活状态')
+    is_enabled = models.BooleanField(default=True, db_index=True, verbose_name='启用状态')
 
     supplier_set = models.ManyToManyField('data.Supplier', blank=True, related_name='product_set', verbose_name='供应商')
     enable_batch_control = models.BooleanField(default=False, db_index=True, verbose_name='批次控制')

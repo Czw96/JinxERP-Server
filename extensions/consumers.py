@@ -33,8 +33,8 @@ class AsyncJsonWebsocketConsumerEx(AsyncJsonWebsocketConsumer):
             if not self.user:
                 raise NotAuthenticated('身份识别失败')
 
-            if not self.user.is_active:
-                raise ValidationError('账号未激活')
+            if not self.user.is_enabled:
+                raise ValidationError('账号已禁用')
 
             await self.init_data()
             await self.channel_layer.group_add(f'{self.consumer_code}.{self.user.id}', self.channel_name)

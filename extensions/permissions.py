@@ -20,8 +20,8 @@ class IsAuthenticated(BasePermission):
         if request.user.is_manager:
             return True
 
-        if not request.user.is_active:
-            raise ValidationError('账号未激活, 无法执行任何操作')
+        if not request.user.is_enabled:
+            raise ValidationError('账号已禁用, 无法执行任何操作')
 
         return True
 

@@ -27,7 +27,7 @@ class UserSerializer(ModelSerializerEx):
         model = User
         read_only_fields = ['id', 'number', 'warehouse_items', 'role_items', 'permissions', 'is_manager',
                             'update_time', 'create_time', 'is_deleted', 'delete_time']
-        fields = ['username', 'name', 'phone', 'warehouse_set', 'role_set', 'remark', 'is_active', 'extension_data',
+        fields = ['username', 'name', 'phone', 'warehouse_set', 'role_set', 'remark', 'is_enabled', 'extension_data',
                   *read_only_fields]
 
     def validate_unique(self, attrs):
@@ -39,8 +39,8 @@ class UserSerializer(ModelSerializerEx):
             if instance.is_deleted:
                 raise ValidationError(f'仓库[{instance.name}] 已删除')
 
-            if not instance.is_active:
-                raise ValidationError(f'仓库[{instance.name}] 未激活')
+            if not instance.is_enabled:
+                raise ValidationError(f'仓库[{instance.name}] 已禁用')
         return instance_set
 
     def create(self, validated_data):
@@ -53,7 +53,7 @@ class UserSerializer(ModelSerializerEx):
         if instance.is_manager:
             validated_data['warehouse_set'] = []
             validated_data['role_set'] = []
-            validated_data['is_active'] = True
+            validated_data['is_enabled'] = True
         return super().update(instance, validated_data)
 
     def save(self, **kwargs):
@@ -68,7 +68,7 @@ class WarehouseSerializer(ModelSerializerEx):
     class Meta:
         model = Warehouse
         read_only_fields = ['id', 'number', 'is_locked', 'update_time', 'create_time', 'is_deleted', 'delete_time']
-        fields = ['name', 'address', 'remark', 'is_active', 'extension_data', *read_only_fields]
+        fields = ['name', 'address', 'remark', 'is_enabled', 'extension_data', *read_only_fields]
 
     def validate_unique(self, attrs):
         self.check_unique(Warehouse.objects.filter(delete_time=None), {'name': attrs['name']}, '该名称已被使用')

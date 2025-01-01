@@ -1,12 +1,25 @@
 from rest_framework.serializers import Serializer
 from rest_framework import serializers
 
+from extensions.exceptions import ValidationError
+
 
 class TextFieldProperty(Serializer):
     """文本字段"""
 
     required = serializers.BooleanField(default=False, allow_null=True, label='必填状态')
+    max_length = serializers.IntegerField(default=60, allow_null=True, min_value=10, max_value=240, label='最大长度')
     default_value = serializers.CharField(default=None, allow_null=True, max_length=240, label='默认值')
+
+    def validate(self, attrs):
+        max_length = attrs['max_length']
+        default_value = attrs['default_value']
+
+        # 验证 max_length, default_value 之间的大小关系
+        if default_value is not None and len(default_value) > max_length:
+            raise ValidationError('默认值长度不能大于最大长度')
+
+        return super().validate(attrs)
 
 
 class NumberFieldProperty(Serializer):
@@ -25,11 +38,11 @@ class NumberFieldProperty(Serializer):
 
         # 验证 min_value, max_value, default_value 之间的大小关系
         if min_value is not None and max_value is not None and min_value > max_value:
-            raise serializers.ValidationError({'min_value': '最小值不能大于最大值'})
+            raise ValidationError('最小值不能大于最大值')
         if min_value is not None and default_value is not None and min_value > default_value:
-            raise serializers.ValidationError({'default_value': '默认值不能小于最小值'})
+            raise ValidationError('默认值不能小于最小值')
         if max_value is not None and default_value is not None and max_value < default_value:
-            raise serializers.ValidationError({'default_value': '默认值不能大于最大值'})
+            raise ValidationError('默认值不能大于最大值')
 
         return super().validate(attrs)
 

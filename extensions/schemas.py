@@ -15,6 +15,10 @@ class InstanceListRequest(Serializer):
     )
 
 
+class ImportRequest(Serializer):
+    import_file = serializers.FileField(label='导入文件')
+
+
 class ExportTaskResponse(Serializer):
     task_number = serializers.CharField(label='任务编号')
 
@@ -26,6 +30,7 @@ class ImportTaskResponse(Serializer):
 __all__ = [
     'MakeNumberResponse',
     'InstanceListRequest',
+    'ImportRequest',
     'ExportTaskResponse',
     'ImportTaskResponse',
 ]
