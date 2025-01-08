@@ -65,7 +65,7 @@ def account_export_task(tenant_id, export_task_id):
             export_task.export_count = completed_count
             export_task.status = ExportTask.ExportStatus.COMPLETED
             export_task.duration = (timezone.localtime() - export_task.create_time).total_seconds()
-            export_task.save(update_fields=['status', 'duration'])
+            export_task.save(update_fields=['export_count', 'status', 'duration'])
 
             notification = Notification.objects.create(title='导出结算账户',
                                                        type=Notification.NotificationType.SUCCESS,

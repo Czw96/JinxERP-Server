@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
+from django_tenants.utils import get_tenant, schema_context
 
 
 from extensions.paginations import PageNumberPaginationEx
@@ -19,6 +20,10 @@ class FunctionViewSet(ViewSet):
     @property
     def user(self):
         return self.request.user
+
+    @property
+    def tenant(self):
+        return get_tenant(self.request)
 
     @property
     def context(self):
@@ -36,6 +41,10 @@ class GenericViewSetEx(GenericViewSet):
     @property
     def user(self):
         return self.request.user
+
+    @property
+    def tenant(self):
+        return get_tenant(self.request)
 
     @property
     def context(self):

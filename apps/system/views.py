@@ -9,7 +9,6 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.db import transaction
 from django.http import FileResponse
 from pathlib import Path
-from django_tenants.utils import get_tenant
 
 from extensions.permissions import IsAuthenticated, IsManagerPermission
 from extensions.exceptions import ValidationError, AuthenticationFailed, NotAuthenticated
@@ -103,9 +102,8 @@ class UserActionViewSet(FunctionViewSet):
             raise AuthenticationFailed('密码错误')
 
         token = RefreshToken()
-        tenant = get_tenant(request)
         token['user_id'] = user.id
-        token['tenant_id'] = tenant.id
+        token['tenant_id'] = self.tenant.id
 
         data = {'access': str(token.access_token), 'refresh': str(token)}
         return Response(data=data, status=status.HTTP_200_OK)
@@ -233,7 +231,7 @@ class WarehouseViewSet(ArchiveViewSet):
 
 class ModelFieldViewSet(ArchiveViewSet):
     serializer_class = ModelFieldSerializer
-    permission_classes = [IsAuthenticated, IsManagerPermission]
+    # permission_classes = [IsAuthenticated, IsManagerPermission]
     filterset_fields = ['model', 'is_deleted']
     search_fields = ['number', 'name', 'remark']
     ordering_fields = ['id', 'number', 'name', 'update_time', 'delete_time']

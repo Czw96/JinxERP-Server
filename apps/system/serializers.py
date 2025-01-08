@@ -18,6 +18,11 @@ class RoleSerializer(ModelSerializerEx):
     def validate_unique(self, attrs):
         self.check_unique(Role.objects.all(), {'name': attrs['name']}, '该名称已被使用')
 
+    def validate(self, attrs):
+        extension_data = attrs.get('extension_data', {})
+        attrs['extension_data'] = validate_extension_data(ModelField.DataModel.ROLE, extension_data)
+        return super().validate(attrs)
+
 
 class UserSerializer(ModelSerializerEx):
     warehouse_items = WarehouseItemSerializer(source='warehouse_set', many=True, read_only=True, label='仓库')
@@ -42,6 +47,11 @@ class UserSerializer(ModelSerializerEx):
             if not instance.is_enabled:
                 raise ValidationError(f'仓库[{instance.name}] 已禁用')
         return instance_set
+
+    def validate(self, attrs):
+        extension_data = attrs.get('extension_data', {})
+        attrs['extension_data'] = validate_extension_data(ModelField.DataModel.USER, extension_data)
+        return super().validate(attrs)
 
     def create(self, validated_data):
         total_count = User.objects.all().count() + 1
@@ -72,6 +82,11 @@ class WarehouseSerializer(ModelSerializerEx):
 
     def validate_unique(self, attrs):
         self.check_unique(Warehouse.objects.filter(delete_time=None), {'name': attrs['name']}, '该名称已被使用')
+
+    def validate(self, attrs):
+        extension_data = attrs.get('extension_data', {})
+        attrs['extension_data'] = validate_extension_data(ModelField.DataModel.WAREHOUSE, extension_data)
+        return super().validate(attrs)
 
     def create(self, validated_data):
         total_count = Warehouse.objects.all().count() + 1
