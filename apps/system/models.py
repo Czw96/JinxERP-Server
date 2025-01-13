@@ -1,7 +1,9 @@
 from django.db.models import Model
 from django.db import models
+from django.utils import timezone
 
 from extensions.models import ArchiveModel, UniqueConstraintEx
+from extensions.exceptions import ValidationError
 
 
 class Role(Model):
@@ -138,10 +140,37 @@ class Notification(Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
 
 
+class NumberRegistry(models.Model):
+    """编号注册表"""
+
+    class DataModel(models.TextChoices):
+        """数据模型"""
+
+        EXPORT_TASK = ('export_task', '导出任务')
+        IMPORT_TASK = ('import_task', '导入任务')
+
+    number = models.CharField(max_length=20, unique=True, verbose_name='编号')
+    model = models.CharField(max_length=20, choices=DataModel, db_index=True, verbose_name='模型')
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+
+    @classmethod
+    def generate_number(cls, prefix, model):
+        today = timezone.now().strftime('%Y%m%d')
+        today_count = NumberRegistry.objects.filter(model=model, create_time__date=timezone.now().date()).count()
+
+        if today_count > 999:
+            raise ValidationError('超出当日创建上限')
+
+        number = f'{prefix}{today}-{today_count + 1:03d}'
+        NumberRegistry.objects.create(number=number, model=model)
+        return number
+
+
 __all__ = [
     'Role',
     'User',
     'Warehouse',
     'ModelField',
     'Notification',
+    'NumberRegistry',
 ]

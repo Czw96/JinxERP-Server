@@ -45,7 +45,7 @@ class ExportTaskViewSet(ModelViewSetEx):
         if export_task.status != ExportTask.ExportStatus.EXPORTING:
             raise ValidationError(f'导出任务已结束, 无法取消')
 
-        async_result = AsyncResult(export_task.number)
+        async_result = AsyncResult(export_task.celery_task_number)
         async_result.revoke(terminate=True)
 
         export_task.status = ExportTask.ExportStatus.CANCELLED

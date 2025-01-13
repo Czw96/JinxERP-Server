@@ -7,10 +7,10 @@ class ExportTaskConsumer(AsyncJsonWebsocketConsumerEx):
     consumer_code = 'export_task'
 
     async def init_data(self):
-        if not (task_number := self.scope['query_params'].get('task_number')):
+        if not (export_task_number := self.scope['query_params'].get('number')):
             raise ValidationError('缺失任务编号')
 
-        if not (export_task := await ExportTask.objects.filter(number=task_number, creator=self.user).afirst()):
+        if not (export_task := await ExportTask.objects.filter(number=export_task_number, creator=self.user).afirst()):
             raise ValidationError('没有进行中的任务')
 
         if export_task.status != ExportTask.ExportStatus.EXPORTING:
