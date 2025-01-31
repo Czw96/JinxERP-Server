@@ -86,18 +86,28 @@ class ModelField(ArchiveModel):
 
         TEXT = ('text', '文本')
         NUMBER = ('number', '数字')
+        BOOLEAN = ('boolean', '布尔')
         DATE = ('date', '日期')
         TIME = ('time', '时间')
+        LIST = ('list', '列表')
         SINGLE_CHOICE = ('single_choice', '单选')
         MULTIPLE_CHOICE = ('multiple_choice', '多选')
 
+    class Source(models.TextChoices):
+        """来源"""
+
+        SYSTEM = ('system', '系统')
+        CUSTOM = ('custom', '自定义')
+
     number = models.CharField(max_length=20, unique=True, verbose_name='编号')
     name = models.CharField(max_length=60, verbose_name='名称')
-    model = models.CharField(max_length=20, choices=DataModel, db_index=True, verbose_name='模型')
-    type = models.CharField(max_length=20, choices=DataType, verbose_name='类型')
+    code = models.CharField(max_length=20, verbose_name='代码')
+    model = models.CharField(max_length=20, choices=DataModel.choices, db_index=True, verbose_name='模型')
+    type = models.CharField(max_length=20, choices=DataType.choices, verbose_name='类型')
     priority = models.IntegerField(default=0, verbose_name='排序')
     remark = models.CharField(max_length=240, null=True, blank=True, verbose_name='备注')
     property = models.JSONField(default=dict, verbose_name='属性')
+    source = models.CharField(max_length=20, choices=Source.choices, default=Source.CUSTOM, verbose_name='来源')
     update_time = models.DateTimeField(auto_now=True, db_index=True, verbose_name='修改时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     is_deleted = models.BooleanField(default=False, db_index=True, verbose_name='删除状态')
@@ -106,6 +116,7 @@ class ModelField(ArchiveModel):
     class Meta:
         constraints = [
             UniqueConstraintEx(fields=['name', 'model', 'delete_time'], name='ModelField.unique_name_model'),
+            UniqueConstraintEx(fields=['code', 'model'], name='ModelField.unique_code_model'),
         ]
 
 
@@ -150,7 +161,7 @@ class NumberRegistry(models.Model):
         IMPORT_TASK = ('import_task', '导入任务')
 
     number = models.CharField(max_length=20, unique=True, verbose_name='编号')
-    model = models.CharField(max_length=20, choices=DataModel, db_index=True, verbose_name='模型')
+    model = models.CharField(max_length=20, choices=DataModel.choices, db_index=True, verbose_name='模型')
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
 
     @classmethod

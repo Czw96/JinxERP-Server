@@ -42,10 +42,12 @@ class FieldConfigResponse(Serializer):
     id = serializers.IntegerField(label='字段ID')
     number = serializers.CharField(label='编号')
     name = serializers.CharField(label='名称')
+    code = serializers.CharField(label='代码')
     model = serializers.CharField(label='模型')
     type = serializers.CharField(label='类型')
     priority = serializers.IntegerField(label='排序')
     property = serializers.JSONField(label='属性')
+    source = serializers.BooleanField(label='来源')
 
 
 __all__ = [

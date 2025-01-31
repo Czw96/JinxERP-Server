@@ -231,8 +231,8 @@ class WarehouseViewSet(ArchiveViewSet):
 
 class ModelFieldViewSet(ArchiveViewSet):
     serializer_class = ModelFieldSerializer
-    # permission_classes = [IsAuthenticated, IsManagerPermission]
-    filterset_fields = ['model', 'is_deleted']
+    permission_classes = [IsAuthenticated, IsManagerPermission]
+    filterset_fields = ['model', 'source', 'is_deleted']
     search_fields = ['number', 'name', 'remark']
     ordering_fields = ['id', 'number', 'name', 'update_time', 'delete_time']
     queryset = ModelField.objects.all()

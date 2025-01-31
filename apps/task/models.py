@@ -19,7 +19,7 @@ class ExportTask(Model):
         FAILED = ('failed', '导出失败')
 
     number = models.CharField(max_length=20, null=True, unique=True, verbose_name='编号')
-    model = models.CharField(max_length=20, choices=DataModel, db_index=True, verbose_name='模型')
+    model = models.CharField(max_length=20, choices=DataModel.choices, db_index=True, verbose_name='模型')
     export_id_list = models.JSONField(default=list, verbose_name='导出 ID 列表')
     export_file = models.FileField(null=True, verbose_name='导出文件')
     export_count = models.IntegerField(null=True, verbose_name='导出条数')
@@ -49,7 +49,7 @@ class ImportTask(Model):
         FAILED = ('failed', '导入失败')
 
     number = models.CharField(max_length=20, unique=True, verbose_name='编号')
-    model = models.CharField(max_length=20, choices=DataModel, db_index=True, verbose_name='模型')
+    model = models.CharField(max_length=20, choices=DataModel.choices, db_index=True, verbose_name='模型')
     import_file = models.FileField(verbose_name='导入文件')
     import_count = models.IntegerField(null=True, verbose_name='导入条数')
     status = models.CharField(

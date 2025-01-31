@@ -20,7 +20,7 @@ class RoleSerializer(ModelSerializerEx):
 
     def validate(self, attrs):
         extension_data = attrs.get('extension_data', {})
-        attrs['extension_data'] = validate_extension_data(ModelField.DataModel.ROLE, extension_data)
+        attrs['extension_data'] = validate_custom_data(ModelField.DataModel.ROLE, extension_data)
         return super().validate(attrs)
 
 
@@ -50,7 +50,7 @@ class UserSerializer(ModelSerializerEx):
 
     def validate(self, attrs):
         extension_data = attrs.get('extension_data', {})
-        attrs['extension_data'] = validate_extension_data(ModelField.DataModel.USER, extension_data)
+        attrs['extension_data'] = validate_custom_data(ModelField.DataModel.USER, extension_data)
         return super().validate(attrs)
 
     def create(self, validated_data):
@@ -85,7 +85,7 @@ class WarehouseSerializer(ModelSerializerEx):
 
     def validate(self, attrs):
         extension_data = attrs.get('extension_data', {})
-        attrs['extension_data'] = validate_extension_data(ModelField.DataModel.WAREHOUSE, extension_data)
+        attrs['extension_data'] = validate_custom_data(ModelField.DataModel.WAREHOUSE, extension_data)
         return super().validate(attrs)
 
     def create(self, validated_data):
@@ -97,11 +97,12 @@ class WarehouseSerializer(ModelSerializerEx):
 class ModelFieldSerializer(ModelSerializerEx):
     model_display = serializers.CharField(source='get_model_display', read_only=True, label='模型')
     type_display = serializers.CharField(source='get_type_display', read_only=True, label='类型')
+    source_display = serializers.CharField(source='get_source_display', read_only=True, label='来源')
 
     class Meta:
         model = ModelField
-        read_only_fields = ['id', 'number', 'model_display', 'type_display', 'update_time', 'create_time',
-                            'is_deleted', 'delete_time']
+        read_only_fields = ['id', 'number', 'code', 'model_display', 'type_display', 'source', 'source_display',
+                             'update_time', 'create_time', 'is_deleted', 'delete_time']
         fields = ['name', 'model', 'type', 'priority', 'remark', 'property', *read_only_fields]
 
     def validate_unique(self, attrs):
@@ -116,10 +117,14 @@ class ModelFieldSerializer(ModelSerializerEx):
             serializer = TextFieldProperty(data=property)
         elif type == ModelField.DataType.NUMBER:
             serializer = NumberFieldProperty(data=property)
+        elif type == ModelField.DataType.BOOLEAN:
+            serializer = BooleanFieldProperty(data=property)
         elif type == ModelField.DataType.DATE:
             serializer = DateFieldProperty(data=property)
         elif type == ModelField.DataType.TIME:
             serializer = TimeFieldProperty(data=property)
+        elif type == ModelField.DataType.LIST:
+            serializer = ListFieldProperty(data=property)
         elif type == ModelField.DataType.SINGLE_CHOICE:
             serializer = SingleChoiceFieldProperty(data=property)
         elif type == ModelField.DataType.MULTIPLE_CHOICE:
@@ -133,14 +138,17 @@ class ModelFieldSerializer(ModelSerializerEx):
 
     def create(self, validated_data):
         total_count = ModelField.objects.all().count() + 1
-        validated_data['number'] = f'MF{total_count:03d}'
+        number = f'CF{total_count:03d}'
+        validated_data['number'] = number
+        validated_data['code'] = number
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        if instance.model != validated_data['model']:
-            raise ValidationError('模型不可修改')
-        if instance.type != validated_data['type']:
-            raise ValidationError('类型不可修改')
+        validated_data.pop('model', None)
+        validated_data.pop('type', None)
+
+        if instance.source == ModelField.Source.SYSTEM:
+            validated_data = {'remark': validated_data.get('remark')}
 
         return super().update(instance, validated_data)
 

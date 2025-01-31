@@ -4,7 +4,7 @@ from extensions.serializers import ModelSerializerEx
 from extensions.exceptions import ValidationError
 from apps.data.models import *
 from apps.system.models import ModelField
-from extensions.field_configs import validate_extension_data
+from extensions.field_configs import validate_custom_data
 
 
 class AccountSerializer(ModelSerializerEx):
@@ -19,7 +19,7 @@ class AccountSerializer(ModelSerializerEx):
 
     def validate(self, attrs):
         extension_data = attrs.get('extension_data', {})
-        attrs['extension_data'] = validate_extension_data(ModelField.DataModel.ACCOUNT, extension_data)
+        attrs['extension_data'] = validate_custom_data(ModelField.DataModel.ACCOUNT, extension_data)
         return super().validate(attrs)
 
     def create(self, validated_data):
