@@ -47,7 +47,7 @@ class FieldConfigResponse(Serializer):
     type = serializers.CharField(label='类型')
     priority = serializers.IntegerField(label='排序')
     property = serializers.JSONField(label='属性')
-    source = serializers.BooleanField(label='来源')
+    source = serializers.CharField(label='来源')
 
 
 __all__ = [
