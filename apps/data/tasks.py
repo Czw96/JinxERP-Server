@@ -45,7 +45,6 @@ def account_export_task(tenant_id, export_task_id):
 
                 extension_item = {model_field.name: instance.extension_data.get(model_field.number)
                                   for model_field in model_field_set}
-                instance.extension_data
                 items.append({
                     '编号': instance.number,
                     '名称': instance.name,

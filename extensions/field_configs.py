@@ -302,6 +302,12 @@ def validate_custom_data(model, data):
     return data
 
 
+def export_extension_data(extension_data, model_field_set):
+    extension_item = {}
+    for model_field in model_field_set:
+        ...
+
+
 __all__ = [
     'TextFieldProperty',
     'NumberFieldProperty',
