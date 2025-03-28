@@ -1,20 +1,22 @@
-from django.core.files.base import ContentFile
-from django_tenants.utils import tenant_context
-from django.utils import timezone
-from django.db import transaction
+import json
+import time
+
 from asgiref.sync import async_to_sync
 from celery import shared_task
-import time
-import json
+from django.core.files.base import ContentFile
+from django.db import transaction
+from django.utils import timezone
+from django_tenants.utils import tenant_context
 
 from apps.data.models import *
 from apps.data.serializers import *
-from apps.task.models import ExportTask, ImportTask
-from apps.tenant.models import Tenant, ErrorLog
-from apps.system.models import ModelField, Notification
 from apps.system.consumers import NotificationConsumer
-from apps.task.consumers import ExportTaskConsumer
+from apps.system.models import ModelField, Notification
 from apps.system.serializers import NotificationSerializer
+from apps.task.consumers import ExportTaskConsumer
+from apps.task.models import ExportTask, ImportTask
+from apps.tenant.models import ErrorLog, Tenant
+from extensions.field_configs import export_extension_data
 
 
 @shared_task
@@ -26,9 +28,6 @@ def account_export_task(tenant_id, export_task_id):
         completed_count = 0
 
         try:
-            model_field_set = ModelField.objects.filter(
-                model=ModelField.DataModel.ACCOUNT, is_deleted=False).order_by('-priority')
-
             queryset = Account.objects.filter(id__in=export_task.export_id_list)
             total_count = queryset.count()
 
@@ -43,14 +42,12 @@ def account_export_task(tenant_id, export_task_id):
                     }
                 )
 
-                extension_item = {model_field.name: instance.extension_data.get(model_field.number)
-                                  for model_field in model_field_set}
                 items.append({
                     '编号': instance.number,
                     '名称': instance.name,
                     '备注': instance.remark,
                     '启用状态': '启用' if instance.is_enabled else '禁用',
-                    **extension_item,
+                    **export_extension_data(ModelField.DataModel.ACCOUNT, instance.extension_data)
                 })
 
                 completed_count += 1

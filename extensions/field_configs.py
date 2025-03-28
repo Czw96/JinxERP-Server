@@ -302,10 +302,36 @@ def validate_custom_data(model, data):
     return data
 
 
-def export_extension_data(extension_data, model_field_set):
+def export_extension_data(model, data):
+    model_field_set = ModelField.objects.filter(model=model, is_deleted=False).order_by('-priority')
+
     extension_item = {}
     for model_field in model_field_set:
-        ...
+        if model_field.type == ModelField.DataType.TEXT:
+            extension_item[model_field.name] = data.get(model_field.number, None)
+        elif model_field.type == ModelField.DataType.NUMBER:
+            extension_item[model_field.name] = data.get(model_field.number, None)
+        elif model_field.type == ModelField.DataType.BOOLEAN:
+            value = data.get(model_field.number, None)
+            if value == True:
+                extension_item[model_field.name] = model_field.property['true_label']
+            elif value == False:
+                extension_item[model_field.name] = model_field.property['false_label']
+            else:
+                extension_item[model_field.name] = None
+        elif model_field.type == ModelField.DataType.DATE:
+            extension_item[model_field.name] = data.get(model_field.number, None)
+        elif model_field.type == ModelField.DataType.TIME:
+            extension_item[model_field.name] = data.get(model_field.number, None)
+        elif model_field.type == ModelField.DataType.LIST:
+            value = data.get(model_field.number, [])
+            extension_item[model_field.name] = ';'.join(value)
+        elif model_field.type == ModelField.DataType.SINGLE_CHOICE:
+            value = data.get(model_field.number, None)
+        elif model_field.type == ModelField.DataType.MULTIPLE_CHOICE:
+            value = data.get(model_field.number, [])
+            extension_item[model_field.name] = ';'.join(value)
+    return extension_item
 
 
 __all__ = [
@@ -318,4 +344,5 @@ __all__ = [
     'SingleChoiceFieldProperty',
     'MultipleChoiceFieldProperty',
     'validate_custom_data',
+    'export_extension_data',
 ]
