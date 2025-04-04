@@ -1,11 +1,11 @@
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 
-from extensions.serializers import ModelSerializerEx
+from apps.system.items import *
+from apps.system.models import *
 from extensions.exceptions import ValidationError
 from extensions.field_configs import *
-from apps.system.models import *
-from apps.system.items import *
+from extensions.serializers import ModelSerializerEx
 
 
 class RoleSerializer(ModelSerializerEx):
@@ -102,7 +102,7 @@ class ModelFieldSerializer(ModelSerializerEx):
     class Meta:
         model = ModelField
         read_only_fields = ['id', 'number', 'code', 'model_display', 'type_display', 'source', 'source_display',
-                             'update_time', 'create_time', 'is_deleted', 'delete_time']
+                            'update_time', 'create_time', 'is_deleted', 'delete_time']
         fields = ['name', 'model', 'type', 'priority', 'remark', 'property', *read_only_fields]
 
     def validate_unique(self, attrs):

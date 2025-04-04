@@ -1,5 +1,5 @@
-from extensions.consumers import AsyncJsonWebsocketConsumerEx
 from apps.system.models import Notification
+from extensions.consumers import AsyncJsonWebsocketConsumerEx
 
 
 class NotificationConsumer(AsyncJsonWebsocketConsumerEx):

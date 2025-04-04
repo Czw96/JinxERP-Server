@@ -1,5 +1,5 @@
-from rest_framework.serializers import Serializer
 from rest_framework import serializers
+from rest_framework.serializers import Serializer
 
 
 class CreateTokenRequest(Serializer):

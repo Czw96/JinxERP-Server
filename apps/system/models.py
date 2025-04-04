@@ -1,9 +1,9 @@
-from django.db.models import Model
 from django.db import models
+from django.db.models import Model
 from django.utils import timezone
 
-from extensions.models import ArchiveModel, UniqueConstraintEx
 from extensions.exceptions import ValidationError
+from extensions.models import ArchiveModel, UniqueConstraintEx
 
 
 class Role(Model):

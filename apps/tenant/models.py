@@ -1,6 +1,6 @@
-from django_tenants.models import TenantMixin, DomainMixin
-from django.db.models import Model
 from django.db import models
+from django.db.models import Model
+from django_tenants.models import DomainMixin, TenantMixin
 
 
 class Tenant(TenantMixin):

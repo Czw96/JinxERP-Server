@@ -2,8 +2,8 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.layers import get_channel_layer
 from django.utils import timezone
 
-from extensions.exceptions import NotAuthenticated, ValidationError
 from apps.tenant.models import ErrorLog
+from extensions.exceptions import NotAuthenticated, ValidationError
 
 
 class AsyncJsonWebsocketConsumerEx(AsyncJsonWebsocketConsumer):

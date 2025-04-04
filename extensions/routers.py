@@ -1,4 +1,4 @@
-from rest_framework.routers import SimpleRouter, Route, DynamicRoute
+from rest_framework.routers import DynamicRoute, Route, SimpleRouter
 
 
 class SimpleRouterEx(SimpleRouter):

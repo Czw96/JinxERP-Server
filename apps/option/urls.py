@@ -1,6 +1,5 @@
-from extensions.routers import SimpleRouterEx
 from apps.option.views import *
-
+from extensions.routers import SimpleRouterEx
 
 router = SimpleRouterEx()
 

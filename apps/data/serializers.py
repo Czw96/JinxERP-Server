@@ -1,10 +1,10 @@
 from rest_framework import serializers
 
-from extensions.serializers import ModelSerializerEx
-from extensions.exceptions import ValidationError
 from apps.data.models import *
 from apps.system.models import ModelField
+from extensions.exceptions import ValidationError
 from extensions.field_configs import validate_custom_data
+from extensions.serializers import ModelSerializerEx
 
 
 class AccountSerializer(ModelSerializerEx):

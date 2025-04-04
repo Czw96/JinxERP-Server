@@ -1,6 +1,5 @@
-from extensions.routers import SimpleRouterEx
 from apps.task.views import *
-
+from extensions.routers import SimpleRouterEx
 
 router = SimpleRouterEx()
 router.register('export_tasks', ExportTaskViewSet, 'export_task')

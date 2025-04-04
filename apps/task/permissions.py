@@ -1,4 +1,4 @@
-from extensions.permissions import ModelPermission, QueryPermission, FunctionPermission
+from extensions.permissions import FunctionPermission, ModelPermission, QueryPermission
 
 
 class ExportTaskPermission(ModelPermission):

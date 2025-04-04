@@ -1,6 +1,6 @@
+from apps.task.models import ExportTask
 from extensions.consumers import AsyncJsonWebsocketConsumerEx
 from extensions.exceptions import ValidationError
-from apps.task.models import ExportTask
 
 
 class ExportTaskConsumer(AsyncJsonWebsocketConsumerEx):

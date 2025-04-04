@@ -1,6 +1,7 @@
 from typing import Tuple
-from django.db.models import Model, Manager, QuerySet, UniqueConstraint
+
 from django.db import models
+from django.db.models import Manager, Model, QuerySet, UniqueConstraint
 from django.utils import timezone
 
 

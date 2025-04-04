@@ -1,9 +1,10 @@
-from django_tenants.utils import get_tenant_domain_model, remove_www
+from urllib.parse import parse_qs
+
 from channels.db import database_sync_to_async
 from django.utils import timezone
-from urllib.parse import parse_qs
-from rest_framework_simplejwt.tokens import AccessToken
+from django_tenants.utils import get_tenant_domain_model, remove_www
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework_simplejwt.tokens import AccessToken
 
 from apps.system.models import User
 

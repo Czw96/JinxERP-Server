@@ -2,8 +2,8 @@ from drf_spectacular.contrib.rest_framework_simplejwt import SimpleJWTScheme
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
-from extensions.exceptions import NotAuthenticated
 from apps.system.models import User
+from extensions.exceptions import NotAuthenticated
 
 
 class SimpleJWTSchemeEx(SimpleJWTScheme):

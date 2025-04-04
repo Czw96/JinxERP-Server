@@ -1,9 +1,10 @@
-from rest_framework.serializers import Serializer
-from rest_framework import serializers
 from datetime import datetime
 
-from extensions.exceptions import ValidationError
+from rest_framework import serializers
+from rest_framework.serializers import Serializer
+
 from apps.system.models import ModelField
+from extensions.exceptions import ValidationError
 
 
 class TextFieldProperty(Serializer):

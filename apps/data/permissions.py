@@ -1,4 +1,4 @@
-from extensions.permissions import ModelPermission, FunctionPermission
+from extensions.permissions import FunctionPermission, ModelPermission
 
 
 class AccountPermission(ModelPermission):

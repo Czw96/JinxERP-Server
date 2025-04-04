@@ -1,6 +1,5 @@
-from extensions.routers import SimpleRouterEx
 from apps.system.views import *
-
+from extensions.routers import SimpleRouterEx
 
 router = SimpleRouterEx()
 router.register('roles', RoleViewSet, 'role')
