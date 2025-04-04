@@ -1,11 +1,30 @@
 import multiprocessing
 
+# ========================
+# 核心服务器配置
+# ========================
+bind = '0.0.0.0:8000'             # 监听地址和端口(0.0.0.0 表示所有网络接口)
+workers = multiprocessing.cpu_count() * 2 + 1  # 工作进程数(CPU 核心数 × 2 + 1 公式)
 
-bind = '0.0.0.0:9000'
-workers = multiprocessing.cpu_count() * 2 + 1
-max_requests = 500
-max_requests_jitter = 100
-reload = True
-accesslog = 'logs/gunicorn_access.log'
-errorlog = 'logs/gunicorn_error.log'
-access_log_format = '%(h)s %(t)s "%(r)s" %(s)s %(b)sB %(M)sms'
+
+# ========================
+# 连接与并发配置
+# ========================
+worker_connections = 1000         # 单个工作进程最大并发连接数
+keepalive = 5                     # 客户端保持连接时间(秒)
+
+
+# ========================
+# 超时与生命周期配置
+# ========================
+timeout = 30                      # 普通请求超时时间(秒)
+graceful_timeout = 10             # 优雅关闭超时时间(接收完请求后等待退出的时间)
+max_requests = 1000               # 单个工作进程处理最大请求数后重启(防内存泄漏)
+max_requests_jitter = 200         # 最大请求数随机波动范围(避免所有worker同时重启)
+
+
+# ========================
+# 开发与优化配置
+# ========================
+reload = True                     # 开发模式: 代码变更时自动重启 worker
+preload_app = True                # 预加载应用(减少启动时间, 但可能影响某些库的线程安全)

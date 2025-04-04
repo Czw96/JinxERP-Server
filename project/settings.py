@@ -10,10 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
 from datetime import timedelta
 from pathlib import Path
-import os
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 
@@ -139,9 +138,9 @@ DATABASES = {
     'default': {
         "ENGINE": "django_tenants.postgresql_backend",
         'HOST': os.getenv('DB_HOST', '127.0.0.1'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+        'PORT': '5432',
         'USER': os.getenv('DB_USER', 'admin'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'admin@1996'),
+        'PASSWORD': os.getenv('DB_PASS', 'admin@1996'),
         'NAME': os.getenv('DB_NAME', 'jinx_erp_v2'),
     }
 }
@@ -163,10 +162,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'static'
+STATIC_ROOT = BASE_DIR / 'volumes' / 'static'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = BASE_DIR / 'volumes' / 'media'
 
 
 # Default primary key field type
@@ -214,6 +213,7 @@ INTERNAL_IPS = ['127.0.0.1']
 # Celery
 # https://docs.celeryq.dev/en/latest/index.html
 
+
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'amqp://guest:guest@127.0.0.1:5672//')
 CELERY_TIMEZONE = 'Asia/Shanghai'
 CELERY_CONFIRM_LONG_RUNNING_TASKS_ON_CONNECTION_LOSS = True
@@ -244,16 +244,79 @@ CHANNEL_LAYERS = {
 }
 
 
-# # django-redis
-# # https://pypi.org/project/django-redis/
+# 日志
 
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django_redis.cache.RedisCache',
-#         'TIMEOUT': None,
-#         'LOCATION': 'redis://127.0.0.1:6379/1',
-#         'OPTIONS': {
-#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-#         }
-#     }
-# }
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} | {levelname} | {process:d} | {module} | {message} | {exc_info}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        'django': {
+            'level': 'INFO',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': BASE_DIR / 'volumes' / 'logs' / 'django.log',
+            'when': 'midnight',
+            'backupCount': 30,
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+        'gunicorn': {
+            'level': 'INFO',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': BASE_DIR / 'volumes' / 'logs' / 'gunicorn.log',
+            'when': 'midnight',
+            'backupCount': 30,
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+        'daphne': {
+            'level': 'INFO',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': BASE_DIR / 'volumes' / 'logs' / 'daphne.log',
+            'when': 'midnight',
+            'backupCount': 30,
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+        'root': {
+            'level': 'INFO',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': BASE_DIR / 'volumes' / 'logs' / 'root.log',
+            'when': 'midnight',
+            'backupCount': 30,
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'django'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'gunicorn': {
+            'handlers': ['console', 'gunicorn'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'daphne': {
+            'handlers': ['console', 'daphne'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+    'root': {
+        'handlers': ['console', 'root'],
+        'level': 'WARNING',
+    },
+}

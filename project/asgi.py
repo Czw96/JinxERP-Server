@@ -13,22 +13,26 @@ from channels.security.websocket import AllowedHostsOriginValidator
 from django.core.asgi import get_asgi_application
 from django.urls import path
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project.settings')
-# Initialize Django ASGI application early to ensure the AppRegistry
-# is populated before importing code that may import ORM models.
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "project.settings")
 django_asgi_app = get_asgi_application()
 
-from extensions.middlewares import WebSocketAuthMiddleware
-from apps.system.consumers import *
-from apps.task.consumers import *
+
+def get_websocket_application():
+    from apps.system.consumers import NotificationConsumer
+    from apps.task.consumers import ExportTaskConsumer
+    from extensions.middlewares import WebSocketAuthMiddleware
+
+    return AllowedHostsOriginValidator(
+        WebSocketAuthMiddleware(
+            URLRouter([
+                path("ws/notifications/", NotificationConsumer.as_asgi()),
+                path("ws/export_tasks/", ExportTaskConsumer.as_asgi()),
+            ])
+        )
+    )
+
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
-    "websocket": AllowedHostsOriginValidator(
-        WebSocketAuthMiddleware(
-            URLRouter([
-                path('ws/notifications/', NotificationConsumer.as_asgi()),
-                path('ws/export_tasks/', ExportTaskConsumer.as_asgi()),
-            ]))
-    ),
+    "websocket": get_websocket_application(),
 })

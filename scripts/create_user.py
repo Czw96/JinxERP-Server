@@ -1,14 +1,15 @@
-from django.contrib.auth.hashers import make_password
-from django.utils import timezone
-from django.db import transaction
-from django_tenants.utils import tenant_context
 from datetime import timedelta
 
-from apps.tenant.models import Tenant, Domain
+from django.contrib.auth.hashers import make_password
+from django.db import transaction
+from django.utils import timezone
+from django_tenants.utils import tenant_context
+
 from apps.system.models import User
+from apps.tenant.models import Domain, Tenant
 
 
-def run(*args):
+def run():
     register_number = input('注册ID: ')
     domain_name = input('域名: ')
     username = input('用户名: ')
